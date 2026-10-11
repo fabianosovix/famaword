@@ -50,26 +50,40 @@ echo ""
 # --- 3. Create .env ---
 echo -e "${BOLD}[3/7] Configurando ambiente...${RESET}"
 if [ ! -f .env ]; then
-  cp .env.example .env
-
   # Generate secure JWT secret
   JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(48).toString('hex'))")
-  # Use sed portable way (BSD + GNU)
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' "s|CHANGE_ME_JWT_SECRET|$JWT_SECRET|g" .env
-  else
-    sed -i "s|CHANGE_ME_JWT_SECRET|$JWT_SECRET|g" .env
-  fi
 
   # Ask for public URL
   echo "  Digite a URL pública do site (ex: https://seusite.com.br):"
   read -r PUBLIC_URL
-  if [ -n "$PUBLIC_URL" ]; then
+  [ -z "$PUBLIC_URL" ] && PUBLIC_URL="http://localhost:3000"
+
+  if [ -f .env.example ]; then
+    cp .env.example .env
     if [[ "$OSTYPE" == "darwin"* ]]; then
+      sed -i '' "s|CHANGE_ME_JWT_SECRET|$JWT_SECRET|g" .env
       sed -i '' "s|http://localhost:3000|$PUBLIC_URL|g" .env
     else
+      sed -i "s|CHANGE_ME_JWT_SECRET|$JWT_SECRET|g" .env
       sed -i "s|http://localhost:3000|$PUBLIC_URL|g" .env
     fi
+  else
+    # Fallback: create .env inline if template is missing
+    cat > .env <<EOF
+# URL pública do site (sem barra final)
+PUBLIC_URL=$PUBLIC_URL
+# Porta do servidor
+PORT=3000
+# Segredo do JWT
+JWT_SECRET=$JWT_SECRET
+# Caminho do banco SQLite
+DB_PATH=./data/veloccms.db
+# Caminho dos uploads
+UPLOAD_DIR=./uploads
+# Chave da OpenAI (opcional — deixe vazio para desativar IA)
+OPENAI_API_KEY=
+EOF
+    echo -e "${GREEN}✓ .env criado (template ausente — gerado inline)${RESET}"
   fi
 
   echo -e "${GREEN}✓ .env criado${RESET}"

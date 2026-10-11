@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { config } from './config.js';
 import { initDb } from './db.js';
 import { runMigrations } from './migrate.js';
-import { authRouter, optionalAuth, requireAuth, requireAdmin } from './auth.js';
+import authRouter, { optionalAuth, requireAuth, requireAdmin } from './auth.js';
 import articlesRouter from './routes/articles.js';
 import categoriesRouter from './routes/categories.js';
 import pagesRouter from './routes/pages.js';
