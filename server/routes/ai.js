@@ -1,7 +1,7 @@
 import express from 'express';
 import { getDb } from '../db.js';
 import { v4 as uuidv4 } from 'uuid';
-import { chatCompletion, generateImage, downloadImage } from '../lib/ai.js';
+import { chatCompletion, generateImage } from '../lib/ai.js';
 import { slugify, uniqueSlug } from '../lib/slug.js';
 import { config } from '../config.js';
 import path from 'path';
@@ -60,14 +60,14 @@ Responda em JSON com este formato:
     ).run(id, parsed.title || topic, slug, parsed.summary || '', parsed.content || '', category_id || null, editor_id, language, parsed.seo_title || null, parsed.seo_description || null);
 
     // Optionally generate cover
-    if (generate_cover && config.openaiApiKey) {
+    if (generate_cover) {
       try {
         const coverPrompt = `Capa de artigo profissional sobre "${parsed.title || topic}", estilo editorial moderno, 16:9, sem texto`;
-        const imageUrl = await generateImage({ prompt: coverPrompt, size: '1792x1024' });
-        if (imageUrl) {
+        const buffer = await generateImage({ prompt: coverPrompt, size: '1792x1024' });
+        if (buffer) {
           const filename = `${uuidv4()}.webp`;
           const destPath = path.join(config.uploadsDir, filename);
-          await downloadImage(imageUrl, destPath);
+          fs.writeFileSync(destPath, buffer);
           const localUrl = `${config.publicUrl.replace(/\/$/, '')}/uploads/${filename}`;
           db.prepare('UPDATE articles SET cover_image = ? WHERE id = ?').run(localUrl, id);
         }
@@ -92,12 +92,12 @@ router.post('/generate-cover', async (req, res, next) => {
     if (!article) return res.status(404).json({ message: 'Article not found' });
 
     const coverPrompt = `Capa de artigo profissional sobre "${article.title}", estilo editorial moderno, 16:9, sem texto`;
-    const imageUrl = await generateImage({ prompt: coverPrompt, size: '1792x1024' });
-    if (!imageUrl) return res.status(500).json({ message: 'Image generation failed' });
+    const buffer = await generateImage({ prompt: coverPrompt, size: '1792x1024' });
+    if (!buffer) return res.status(500).json({ message: 'Image generation failed' });
 
     const filename = `${uuidv4()}.webp`;
     const destPath = path.join(config.uploadsDir, filename);
-    await downloadImage(imageUrl, destPath);
+    fs.writeFileSync(destPath, buffer);
     const localUrl = `${config.publicUrl.replace(/\/$/, '')}/uploads/${filename}`;
     db.prepare('UPDATE articles SET cover_image = ? WHERE id = ?').run(localUrl, article_id);
 

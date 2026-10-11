@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Trash2, Loader2, Sparkles, Plus, Play } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import AIProviderConfig from '@/components/admin/AIProviderConfig';
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const QUEUE_STATUS = { pending: 'Pendente', processing: 'Processando', done: 'Concluído', failed: 'Falhou' };
@@ -123,6 +124,8 @@ export default function AdminAI() {
         <h1 className="font-heading font-bold text-2xl">Inteligência Artificial</h1>
         <Button variant="outline" onClick={runNow}><Play className="w-4 h-4 mr-2" /> Processar agora</Button>
       </div>
+
+      <AIProviderConfig />
 
       <section className="bg-background border border-border rounded-lg p-5 space-y-3">
         <h2 className="font-heading font-semibold flex items-center gap-2"><Sparkles className="w-4 h-4" /> Gerar artigo agora</h2>
