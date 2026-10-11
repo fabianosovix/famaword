@@ -7,25 +7,12 @@ const TABLE = 'settings';
 const JSON_FIELDS = ['social_links'];
 const MAP_OPTS = { jsonFields: JSON_FIELDS };
 
-function camelKeys(obj) {
-  if (!obj) return obj;
-  const out = {};
-  for (const [k, v] of Object.entries(obj)) out[k.replace(/_([a-z])/g, (_, c) => c.toUpperCase())] = v;
-  return out;
-}
-function snakeKeys(obj) {
-  if (!obj) return obj;
-  const out = {};
-  for (const [k, v] of Object.entries(obj)) out[k.replace(/[A-Z]/g, c => '_' + c.toLowerCase())] = v;
-  return out;
-}
-
 // GET / — public read
 router.get('/', optionalAuth, (req, res, next) => {
   try {
     const row = getDb().prepare(`SELECT * FROM ${TABLE} WHERE id = 1`).get();
     if (!row) return res.json({});
-    res.json(camelKeys(mapRow(row, MAP_OPTS)));
+    res.json(mapRow(row, MAP_OPTS));
   } catch (e) { next(e); }
 });
 
@@ -33,7 +20,7 @@ router.get('/', optionalAuth, (req, res, next) => {
 router.put('/', requireAuth, requireAdmin, (req, res, next) => {
   try {
     const db = getDb();
-    const data = unmapData(snakeKeys(req.body), MAP_OPTS);
+    const data = unmapData(req.body, MAP_OPTS);
     delete data.id;
     const cols = Object.keys(data);
     // Upsert: settings is a single-row table (id = 1)
@@ -50,7 +37,7 @@ router.put('/', requireAuth, requireAdmin, (req, res, next) => {
       }
     }
     const row = db.prepare(`SELECT * FROM ${TABLE} WHERE id = 1`).get();
-    res.json(camelKeys(mapRow(row, MAP_OPTS)));
+    res.json(mapRow(row, MAP_OPTS));
   } catch (e) { next(e); }
 });
 
