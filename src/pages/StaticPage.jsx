@@ -33,10 +33,10 @@ export default function StaticPage() {
   if (notFound) return <p className="text-muted-foreground text-center py-20">{t('page_not_found')}</p>;
 
   return (
-    <article className="max-w-2xl mx-auto px-4 py-10">
+    <article className="max-w-2xl mx-auto px-4 py-10 overflow-hidden">
       <h1 className="font-heading font-bold text-3xl mb-6" style={{ color: 'var(--brand-primary)' }}>{page.title}</h1>
       <div
-        className="prose-content text-foreground/90 leading-relaxed [&_h2]:font-heading [&_h2]:font-bold [&_h2]:text-xl [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:font-heading [&_h3]:font-semibold [&_h3]:text-lg [&_h3]:mt-6 [&_h3]:mb-2 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4"
+        className="prose-content text-foreground/90 leading-relaxed break-words [&_*]:max-w-full [&_img]:max-w-full [&_img]:h-auto [&_pre]:overflow-x-auto [&_pre]:max-w-full [&_h2]:font-heading [&_h2]:font-bold [&_h2]:text-xl [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:font-heading [&_h3]:font-semibold [&_h3]:text-lg [&_h3]:mt-6 [&_h3]:mb-2 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_a]:underline [&_a]:break-words"
         dangerouslySetInnerHTML={{ __html: page.content || '' }}
       />
     </article>

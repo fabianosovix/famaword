@@ -55,7 +55,7 @@ export default function ArticlePage() {
   );
 
   return (
-    <article className="max-w-2xl mx-auto px-4 py-8">
+    <article className="max-w-2xl mx-auto px-4 py-8 overflow-hidden">
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition">
         <ArrowLeft className="w-4 h-4" /> {t('back')}
       </button>
@@ -74,7 +74,7 @@ export default function ArticlePage() {
         </div>
       )}
       <div
-        className="prose-content text-foreground/90 leading-relaxed [&_h2]:font-heading [&_h2]:font-bold [&_h2]:text-xl [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:font-heading [&_h3]:font-semibold [&_h3]:text-lg [&_h3]:mt-6 [&_h3]:mb-2 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_a]:underline"
+        className="prose-content text-foreground/90 leading-relaxed break-words [&_*]:max-w-full [&_img]:max-w-full [&_img]:h-auto [&_pre]:overflow-x-auto [&_pre]:max-w-full [&_h2]:font-heading [&_h2]:font-bold [&_h2]:text-xl [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:font-heading [&_h3]:font-semibold [&_h3]:text-lg [&_h3]:mt-6 [&_h3]:mb-2 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_a]:underline [&_a]:break-words"
         dangerouslySetInnerHTML={{ __html: article.content || '' }}
       />
     </article>
