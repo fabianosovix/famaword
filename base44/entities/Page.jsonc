@@ -1,0 +1,45 @@
+{
+  "name": "Page",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "T\u00edtulo"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "content": {
+      "type": "string",
+      "title": "Conte\u00fado"
+    },
+    "page_type": {
+      "type": "string",
+      "title": "Tipo",
+      "enum": [
+        "about",
+        "contact",
+        "privacy",
+        "cookies",
+        "custom"
+      ],
+      "default": "custom"
+    },
+    "in_footer_menu": {
+      "type": "boolean",
+      "title": "No menu do rodap\u00e9",
+      "default": true
+    },
+    "order": {
+      "type": "number",
+      "title": "Ordem",
+      "default": 0
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "page_type"
+  ]
+}

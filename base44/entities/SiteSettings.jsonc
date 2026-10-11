@@ -1,0 +1,65 @@
+{
+  "name": "SiteSettings",
+  "type": "object",
+  "properties": {
+    "site_name": {
+      "type": "string",
+      "title": "Nome do site",
+      "default": "Meu Site"
+    },
+    "logo_url": {
+      "type": "string",
+      "title": "Logo"
+    },
+    "primary_color": {
+      "type": "string",
+      "title": "Cor prim\u00e1ria",
+      "default": "#111111"
+    },
+    "secondary_color": {
+      "type": "string",
+      "title": "Cor secund\u00e1ria",
+      "default": "#6b7280"
+    },
+    "header_scripts": {
+      "type": "string",
+      "title": "Scripts do header"
+    },
+    "footer_scripts": {
+      "type": "string",
+      "title": "Scripts do footer"
+    },
+    "social_links": {
+      "type": "object",
+      "title": "Redes sociais",
+      "properties": {
+        "facebook": {
+          "type": "string"
+        },
+        "twitter": {
+          "type": "string"
+        },
+        "instagram": {
+          "type": "string"
+        },
+        "youtube": {
+          "type": "string"
+        },
+        "linkedin": {
+          "type": "string"
+        }
+      }
+    },
+    "ads_txt": {
+      "type": "string",
+      "title": "Conte\u00fado do ads.txt"
+    },
+    "footer_text": {
+      "type": "string",
+      "title": "Texto do rodap\u00e9"
+    }
+  },
+  "required": [
+    "site_name"
+  ]
+}

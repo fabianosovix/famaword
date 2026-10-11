@@ -1,0 +1,59 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { slugify, uniqueSlug, buildArticlePrompt, articleSchema } from "../../shared/cms.ts";
+
+export default async function(req) {
+  try {
+    const base44 = createClientFromRequest(req);
+    const svc = base44.asServiceRole;
+
+    const today = new Date();
+    const dow = today.getDay();
+
+    const schedulesRes = await svc.entities.AISchedule.filter({ day_of_week: dow, active: true });
+    const queueRes = await svc.entities.AIQueue.filter({ status: 'pending' }, { sort: 'created_date', limit: 5 });
+
+    const tasks = [];
+    for (const s of schedulesRes.items || []) {
+      tasks.push({ topic: s.topic, category_id: s.category_id, source: 'schedule', id: s.id });
+    }
+    for (const q of queueRes.items || []) {
+      tasks.push({ topic: q.topic, category_id: q.category_id, source: 'queue', id: q.id });
+    }
+
+    const results = [];
+    for (const t of tasks.slice(0, 3)) {
+      try {
+        const category = await svc.entities.Category.get(t.category_id);
+        const gen = await svc.integrations.Core.InvokeLLM({
+          prompt: buildArticlePrompt(t.topic, category.name),
+          response_json_schema: articleSchema
+        });
+        const slug = uniqueSlug(slugify(gen.title));
+        const article = await svc.entities.Article.create({
+          title: gen.title,
+          slug,
+          summary: gen.summary || "",
+          content: gen.content || "",
+          category_id: t.category_id,
+          status: 'published',
+          ai_generated: true,
+          seo_title: gen.seo_title || gen.title,
+          seo_description: gen.seo_description || gen.summary || ""
+        });
+        if (t.source === 'queue') {
+          await svc.entities.AIQueue.update(t.id, { status: 'done', result_article_id: article.id });
+        }
+        results.push({ ok: true, title: gen.title, source: t.source });
+      } catch (e) {
+        if (t.source === 'queue') {
+          await svc.entities.AIQueue.update(t.id, { status: 'failed', error: e.message });
+        }
+        results.push({ ok: false, error: e.message, source: t.source });
+      }
+    }
+
+    return Response.json({ processed: results.length, results });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+}

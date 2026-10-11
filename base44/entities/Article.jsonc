@@ -1,0 +1,64 @@
+{
+  "name": "Article",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "T\u00edtulo"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "summary": {
+      "type": "string",
+      "title": "Resumo"
+    },
+    "content": {
+      "type": "string",
+      "title": "Conte\u00fado"
+    },
+    "cover_image": {
+      "type": "string",
+      "title": "Imagem de capa"
+    },
+    "category_id": {
+      "type": "string",
+      "title": "Categoria"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "draft",
+        "published",
+        "scheduled"
+      ],
+      "default": "draft"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "title": "Data agendada",
+      "format": "date-time"
+    },
+    "ai_generated": {
+      "type": "boolean",
+      "title": "Gerado por IA",
+      "default": false
+    },
+    "seo_title": {
+      "type": "string",
+      "title": "SEO T\u00edtulo"
+    },
+    "seo_description": {
+      "type": "string",
+      "title": "SEO Descri\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "category_id",
+    "status"
+  ]
+}

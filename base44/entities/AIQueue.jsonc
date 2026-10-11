@@ -1,0 +1,38 @@
+{
+  "name": "AIQueue",
+  "type": "object",
+  "properties": {
+    "topic": {
+      "type": "string",
+      "title": "Tema"
+    },
+    "category_id": {
+      "type": "string",
+      "title": "Categoria"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "pending",
+        "processing",
+        "done",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "result_article_id": {
+      "type": "string",
+      "title": "Artigo gerado"
+    },
+    "error": {
+      "type": "string",
+      "title": "Erro"
+    }
+  },
+  "required": [
+    "topic",
+    "category_id",
+    "status"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "scheduled_ai_publishing",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_ai": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runScheduledAI"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Publicar artigos da IA",
+            "description": "Agenda semanal + fila de temas"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Processa a agenda semanal e a fila de temas, publicando artigos gerados por IA automaticamente",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Publica\u00e7\u00e3o Programada por IA"
+}

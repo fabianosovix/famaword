@@ -1,0 +1,37 @@
+{
+  "name": "AISchedule",
+  "type": "object",
+  "properties": {
+    "day_of_week": {
+      "type": "number",
+      "title": "Dia da semana",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "topic": {
+      "type": "string",
+      "title": "Tema"
+    },
+    "category_id": {
+      "type": "string",
+      "title": "Categoria"
+    },
+    "active": {
+      "type": "boolean",
+      "title": "Ativo",
+      "default": true
+    }
+  },
+  "required": [
+    "day_of_week",
+    "topic",
+    "category_id"
+  ]
+}
