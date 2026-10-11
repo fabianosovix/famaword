@@ -30,9 +30,10 @@ export default function AdminArticleEdit() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [cats, setCats] = useState([]);
+  const [editors, setEditors] = useState([]);
   const [form, setForm] = useState({
     title: '', slug: '', summary: '', content: '', cover_image: '',
-    category_id: '', status: 'draft', seo_title: '', seo_description: '',
+    category_id: '', editor_id: 'random', status: 'draft', seo_title: '', seo_description: '',
   });
   const [aiOpen, setAiOpen] = useState(false);
   const [aiTopic, setAiTopic] = useState('');
@@ -46,12 +47,15 @@ export default function AdminArticleEdit() {
       try {
         const res = await base44.entities.Category.filter({}, { sort: 'order', limit: 200 });
         setCats(res.items || []);
+        const edRes = await base44.entities.Editor.filter({}, { sort: 'name', limit: 200 });
+        setEditors(edRes.items || []);
         if (!isNew && id) {
           const a = await base44.entities.Article.get(id);
           setForm({
             title: a.title || '', slug: a.slug || '', summary: a.summary || '',
             content: a.content || '', cover_image: a.cover_image || '',
-            category_id: a.category_id || '', status: a.status || 'draft',
+            category_id: a.category_id || '', editor_id: a.editor_id || 'random',
+            status: a.status || 'draft',
             seo_title: a.seo_title || '', seo_description: a.seo_description || '',
           });
         }
@@ -107,12 +111,13 @@ export default function AdminArticleEdit() {
     if (!aiTopic || !catId) return toast({ title: 'Informe tema e categoria', variant: 'destructive' });
     setAiLoading(true);
     try {
-      const res = await base44.functions.invoke('generateArticle', { topic: aiTopic, category_id: catId });
+      const res = await base44.functions.invoke('generateArticle', { topic: aiTopic, category_id: catId, editor_id: form.editor_id || 'random' });
       const article = res.data.article;
       setForm({
         title: article.title, slug: article.slug, summary: article.summary,
         content: article.content, cover_image: '', category_id: article.category_id,
-        status: 'draft', seo_title: article.seo_title, seo_description: article.seo_description,
+        editor_id: article.editor_id || 'random', status: 'draft',
+        seo_title: article.seo_title, seo_description: article.seo_description,
       });
       toast({ title: 'Rascunho gerado pela IA. Revise e publique.' });
       setAiOpen(false);
@@ -129,7 +134,16 @@ export default function AdminArticleEdit() {
     e.preventDefault();
     if (!form.title || !form.category_id) return toast({ title: 'Título e categoria são obrigatórios', variant: 'destructive' });
     const slug = form.slug || slugify(form.title);
-    const payload = { ...form, slug };
+    // Resolve "aleatório" para um editor real
+    let editorId = form.editor_id;
+    if (editorId === 'random') {
+      if (editors.length === 0) {
+        editorId = '';
+      } else {
+        editorId = editors[Math.floor(Math.random() * editors.length)].id;
+      }
+    }
+    const payload = { ...form, editor_id: editorId, slug };
     setSaving(true);
     try {
       if (isNew) {
@@ -195,6 +209,15 @@ export default function AdminArticleEdit() {
               {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
+        </div>
+        <div>
+          <Label htmlFor="editor">Editor / Escritor</Label>
+          <select id="editor" value={form.editor_id} onChange={(e) => setForm({ ...form, editor_id: e.target.value })}
+            className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm">
+            <option value="random">Aleatório</option>
+            {editors.map((ed) => <option key={ed.id} value={ed.id}>{ed.name}</option>)}
+          </select>
+          <p className="text-xs text-muted-foreground mt-1">Escolha o escritor que assina este artigo, ou deixe em aleatório.</p>
         </div>
         <div>
           <Label htmlFor="summary">Resumo</Label>

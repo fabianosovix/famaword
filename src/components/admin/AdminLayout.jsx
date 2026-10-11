@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { LayoutDashboard, FileText, FolderTree, FileBox, Bot, Users, Settings, LogOut, ExternalLink, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileText, FolderTree, FileBox, Bot, Users, Settings, LogOut, ExternalLink, Menu, X, PenLine } from 'lucide-react';
 import { useState } from 'react';
 
 const NAV = [
@@ -9,6 +9,7 @@ const NAV = [
   { to: '/admin/categorias', label: 'Categorias', icon: FolderTree },
   { to: '/admin/paginas', label: 'Páginas', icon: FileBox },
   { to: '/admin/ia', label: 'IA', icon: Bot },
+  { to: '/admin/editores', label: 'Editores', icon: PenLine },
   { to: '/admin/usuarios', label: 'Usuários', icon: Users, adminOnly: true },
   { to: '/admin/configuracoes', label: 'Configurações', icon: Settings, adminOnly: true },
 ];

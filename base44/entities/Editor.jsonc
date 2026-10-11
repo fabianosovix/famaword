@@ -1,0 +1,26 @@
+{
+  "name": "Editor",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nome"
+    },
+    "email": {
+      "type": "string",
+      "title": "E-mail",
+      "format": "email"
+    },
+    "description": {
+      "type": "string",
+      "title": "Descri\u00e7\u00e3o"
+    },
+    "photo": {
+      "type": "string",
+      "title": "Foto"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -26,6 +26,10 @@
       "type": "string",
       "title": "Categoria"
     },
+    "editor_id": {
+      "type": "string",
+      "title": "Editor"
+    },
     "language": {
       "type": "string",
       "title": "Idioma",

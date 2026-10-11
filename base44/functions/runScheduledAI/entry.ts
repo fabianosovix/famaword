@@ -20,6 +20,14 @@ export default async function(req) {
       tasks.push({ topic: q.topic, category_id: q.category_id, language: q.language || 'pt-BR', source: 'queue', id: q.id });
     }
 
+    // Carrega editores uma vez para atribuição aleatória
+    let editors = [];
+    try {
+      const edRes = await svc.entities.Editor.filter({}, { limit: 200 });
+      editors = edRes.items || [];
+    } catch (e) {}
+    const randomEditorId = () => editors.length > 0 ? editors[Math.floor(Math.random() * editors.length)].id : '';
+
     const results = [];
     for (const t of tasks.slice(0, 3)) {
       try {
@@ -43,6 +51,7 @@ export default async function(req) {
           summary: gen.summary || "",
           content: gen.content || "",
           category_id: t.category_id,
+          editor_id: randomEditorId(),
           language: t.language,
           cover_image: coverUrl,
           status: 'published',

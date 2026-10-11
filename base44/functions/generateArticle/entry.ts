@@ -14,11 +14,21 @@ export default async function(req) {
     const topic = body.topic;
     const categoryId = body.category_id;
     const language = body.language || 'pt-BR';
+    let editorId = body.editor_id || 'random';
     if (!topic || !categoryId) {
       return Response.json({ error: 'topic e category_id são obrigatórios' }, { status: 400 });
     }
 
     const category = await base44.entities.Category.get(categoryId);
+
+    // Resolve editor: "random" ou vazio escolhe um editor aleatório
+    if (editorId === 'random' || !editorId) {
+      try {
+        const edRes = await base44.entities.Editor.filter({}, { limit: 200 });
+        const eds = edRes.items || [];
+        editorId = eds.length > 0 ? eds[Math.floor(Math.random() * eds.length)].id : '';
+      } catch (e) { editorId = ''; }
+    }
 
     const [genRes, coverRes] = await Promise.allSettled([
       base44.asServiceRole.integrations.Core.InvokeLLM({
@@ -40,6 +50,7 @@ export default async function(req) {
       summary: gen.summary || "",
       content: gen.content || "",
       category_id: categoryId,
+      editor_id: editorId,
       language,
       cover_image: coverUrl,
       status: 'draft',

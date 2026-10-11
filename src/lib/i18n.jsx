@@ -16,6 +16,7 @@ const translations = {
     all_rights_reserved: 'Todos os direitos reservados.',
     see_all: 'Ver todos',
     article: 'Artigo',
+    written_by: 'Escrito por',
     site_name_default: 'Meu Site',
   },
   es: {
@@ -33,6 +34,7 @@ const translations = {
     all_rights_reserved: 'Todos los derechos reservados.',
     see_all: 'Ver todos',
     article: 'Artículo',
+    written_by: 'Escrito por',
     site_name_default: 'Mi Sitio',
   },
   en: {
@@ -50,6 +52,7 @@ const translations = {
     all_rights_reserved: 'All rights reserved.',
     see_all: 'See all',
     article: 'Article',
+    written_by: 'Written by',
     site_name_default: 'My Site',
   },
 };

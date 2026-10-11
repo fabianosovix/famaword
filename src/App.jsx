@@ -29,6 +29,7 @@ import AdminPages from '@/pages/admin/AdminPages';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import AdminAI from '@/pages/admin/AdminAI';
+import AdminEditors from '@/pages/admin/AdminEditors';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
             <Route path="/admin/categorias" element={<AdminCategories />} />
             <Route path="/admin/paginas" element={<AdminPages />} />
             <Route path="/admin/ia" element={<AdminAI />} />
+            <Route path="/admin/editores" element={<AdminEditors />} />
             <Route path="/admin/usuarios" element={<AdminUsers />} />
             <Route path="/admin/configuracoes" element={<AdminSettings />} />
           </Route>
