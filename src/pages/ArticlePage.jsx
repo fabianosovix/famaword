@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Image } from '@/components/ui/image';
 import { useTranslation } from '@/lib/i18n';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function ArticlePage() {
   const { t } = useTranslation();
   const { slug } = useParams();
   const [article, setArticle] = useState(null);
-  const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -23,12 +20,6 @@ export default function ArticlePage() {
         const a = (res.items || [])[0];
         if (!a) { setNotFound(true); return; }
         setArticle(a);
-        if (a.category_id) {
-          try {
-            const c = await base44.entities.Category.get(a.category_id);
-            setCategory(c);
-          } catch (e) {}
-        }
       } catch (e) {
         setNotFound(true);
       } finally {
@@ -56,23 +47,10 @@ export default function ArticlePage() {
 
   return (
     <article className="max-w-2xl mx-auto px-4 py-8 overflow-hidden">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition">
-        <ArrowLeft className="w-4 h-4" /> {t('back')}
-      </button>
-      {category && (
-        <Link to={`/categoria/${category.slug}`} className="text-xs font-semibold uppercase tracking-wider hover:underline" style={{ color: 'var(--brand-secondary)' }}>
-          {category.name}
-        </Link>
-      )}
-      <h1 className="font-heading font-bold text-3xl md:text-4xl leading-tight mt-2 mb-4" style={{ color: 'var(--brand-primary)' }}>
+      <h1 className="font-heading font-bold text-3xl md:text-4xl leading-tight mb-4" style={{ color: 'var(--brand-primary)' }}>
         {article.title}
       </h1>
       {article.summary && <p className="text-lg text-muted-foreground mb-6">{article.summary}</p>}
-      {article.cover_image && (
-        <div className="aspect-[16/9] overflow-hidden rounded-xl bg-muted mb-8">
-          <Image src={article.cover_image} alt={article.title} className="w-full h-full" fittingType="fill" />
-        </div>
-      )}
       <div
         className="prose-content text-foreground/90 leading-relaxed break-words [&_*]:max-w-full [&_img]:max-w-full [&_img]:h-auto [&_pre]:overflow-x-auto [&_pre]:max-w-full [&_h2]:font-heading [&_h2]:font-bold [&_h2]:text-xl [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:font-heading [&_h3]:font-semibold [&_h3]:text-lg [&_h3]:mt-6 [&_h3]:mb-2 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_a]:underline [&_a]:break-words"
         dangerouslySetInnerHTML={{ __html: article.content || '' }}

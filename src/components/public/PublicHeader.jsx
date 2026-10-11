@@ -4,12 +4,13 @@ import { base44 } from '@/api/base44Client';
 import { useSettings } from '@/lib/SettingsProvider';
 import { useTranslation } from '@/lib/i18n';
 import { Image } from '@/components/ui/image';
-import { Loader2, ChevronDown } from 'lucide-react';
+import { Loader2, ChevronDown, Menu, X } from 'lucide-react';
 
 export default function PublicHeader() {
   const { settings } = useSettings();
   const { t } = useTranslation();
   const [cats, setCats] = useState([]);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +35,43 @@ export default function PublicHeader() {
     }
   });
 
-  const go = (slug) => navigate(`/categoria/${slug}`);
+  const go = (slug) => {
+    navigate(`/categoria/${slug}`);
+    setMobileOpen(false);
+  };
+
+  const renderItem = (c, isSub = false) => {
+    const children = childrenByParent[c.id] || [];
+    return (
+      <div key={c.id} className={isSub ? '' : 'border-b border-border last:border-b-0'}>
+        <button
+          onClick={() => go(c.slug)}
+          className={`block w-full text-left px-3 py-2.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-muted transition ${isSub ? 'pl-6 text-foreground/70' : ''}`}
+        >
+          {c.name}
+        </button>
+        {children.length > 0 && (
+          <div className="bg-muted/30">
+            <button
+              onClick={() => go(c.slug)}
+              className="block w-full text-left px-3 py-2 text-xs font-medium text-foreground/60 hover:text-foreground hover:bg-muted transition pl-9"
+            >
+              {t('see_all')}
+            </button>
+            {children.map((sub) => (
+              <button
+                key={sub.id}
+                onClick={() => go(sub.slug)}
+                className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-muted transition pl-9"
+              >
+                {sub.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <header className="border-b border-border bg-background sticky top-0 z-30">
@@ -48,7 +85,9 @@ export default function PublicHeader() {
             </span>
           )}
         </Link>
-        <nav className="flex items-center gap-1 sm:gap-2 overflow-visible">
+
+        {/* Desktop nav */}
+        <nav className="hidden sm:flex items-center gap-1 sm:gap-2 overflow-visible">
           {topLevel.map((c) => {
             const children = childrenByParent[c.id] || [];
             if (children.length === 0) {
@@ -94,7 +133,29 @@ export default function PublicHeader() {
             );
           })}
         </nav>
+
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMobileOpen((v) => !v)}
+          className="sm:hidden p-2 -mr-2 text-foreground hover:bg-muted rounded-md transition"
+          aria-label="Menu"
+        >
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+
+      {/* Mobile menu panel */}
+      {mobileOpen && (
+        <div className="sm:hidden border-t border-border bg-background">
+          <div className="max-w-5xl mx-auto px-4 py-2">
+            {topLevel.length === 0 ? (
+              <p className="px-3 py-4 text-sm text-muted-foreground">{t('site_name_default')}</p>
+            ) : (
+              topLevel.map((c) => renderItem(c))
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
