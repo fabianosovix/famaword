@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, Loader2, Upload } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AdminSettings() {
   const { toast } = useToast();
   const [settingsId, setSettingsId] = useState(null);
   const [form, setForm] = useState({
-    site_name: '', logo_url: '', primary_color: '#111111', secondary_color: '#6b7280',
+    site_name: '', language: 'pt-BR', logo_url: '', primary_color: '#111111', secondary_color: '#6b7280',
     header_scripts: '', footer_scripts: '', ads_txt: '', footer_text: '',
     social_links: { facebook: '', twitter: '', instagram: '', youtube: '', linkedin: '' },
   });
@@ -26,7 +27,7 @@ export default function AdminSettings() {
       if (s) {
         setSettingsId(s.id);
         setForm({
-          site_name: s.site_name || '', logo_url: s.logo_url || '',
+          site_name: s.site_name || '', language: s.language || 'pt-BR', logo_url: s.logo_url || '',
           primary_color: s.primary_color || '#111111', secondary_color: s.secondary_color || '#6b7280',
           header_scripts: s.header_scripts || '', footer_scripts: s.footer_scripts || '',
           ads_txt: s.ads_txt || '', footer_text: s.footer_text || '',
@@ -85,6 +86,17 @@ export default function AdminSettings() {
           <div>
             <Label htmlFor="site_name">Nome do site</Label>
             <Input id="site_name" value={form.site_name} onChange={(e) => setForm({ ...form, site_name: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="language">Idioma do site</Label>
+            <Select value={form.language} onValueChange={(v) => setForm({ ...form, language: v })}>
+              <SelectTrigger id="language" className="w-full"><SelectValue placeholder="Selecione o idioma" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
+                <SelectItem value="es">Espanhol</SelectItem>
+                <SelectItem value="en">Inglês</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label>Logo</Label>

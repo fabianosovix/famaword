@@ -7,6 +7,16 @@
       "title": "Nome do site",
       "default": "Meu Site"
     },
+    "language": {
+      "type": "string",
+      "title": "Idioma do site",
+      "enum": [
+        "pt-BR",
+        "es",
+        "en"
+      ],
+      "default": "pt-BR"
+    },
     "logo_url": {
       "type": "string",
       "title": "Logo"
