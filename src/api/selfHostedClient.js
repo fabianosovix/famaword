@@ -10,7 +10,10 @@
 // ─────────────────────────────────────────────────────────────
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
-const TOKEN_KEY = 'veloccms_token';
+// Use the same storage key as @base44/sdk's getAccessToken so the
+// platform-managed AuthContext (which reads appParams.token) detects the
+// session after login/register.
+const TOKEN_KEY = 'base44_access_token';
 
 // --- Token management ---
 function getToken() {
@@ -179,6 +182,10 @@ const auth = {
     return request('/auth/me');
   },
 
+  hasToken() {
+    try { return !!localStorage.getItem(TOKEN_KEY); } catch { return false; }
+  },
+
   async isAuthenticated() {
     try {
       await request('/auth/me');
@@ -330,8 +337,20 @@ const analytics = {
   track() { /* no-op in self-hosted mode */ },
 };
 
+// --- App (public settings, used by the platform-managed AuthContext) ---
+const app = {
+  async getPublicSettings() {
+    try {
+      return await request('/settings');
+    } catch {
+      return { id: 1, public_settings: {} };
+    }
+  },
+};
+
 // --- Export ---
 export const base44 = {
+  app,
   entities: {
     Article: new EntityAPI('articles'),
     Category: new EntityAPI('categories'),
