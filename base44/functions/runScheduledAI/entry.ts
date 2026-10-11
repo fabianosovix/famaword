@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import { slugify, uniqueSlug, buildArticlePrompt, articleSchema } from "../../shared/cms.ts";
+import { slugify, uniqueSlug, buildArticlePrompt, buildCoverPrompt, articleSchema } from "../../shared/cms.ts";
 
 export default async function(req) {
   try {
@@ -24,10 +24,18 @@ export default async function(req) {
     for (const t of tasks.slice(0, 3)) {
       try {
         const category = await svc.entities.Category.get(t.category_id);
-        const gen = await svc.integrations.Core.InvokeLLM({
-          prompt: buildArticlePrompt(t.topic, category.name, t.language),
-          response_json_schema: articleSchema
-        });
+        const [genRes, coverRes] = await Promise.allSettled([
+          svc.integrations.Core.InvokeLLM({
+            prompt: buildArticlePrompt(t.topic, category.name, t.language),
+            response_json_schema: articleSchema
+          }),
+          svc.integrations.Core.GenerateImage({
+            prompt: buildCoverPrompt(t.topic)
+          })
+        ]);
+        if (genRes.status !== 'fulfilled') throw new Error('Falha ao gerar o texto');
+        const gen = genRes.value;
+        const coverUrl = coverRes.status === 'fulfilled' ? coverRes.value.url : '';
         const slug = uniqueSlug(slugify(gen.title));
         const article = await svc.entities.Article.create({
           title: gen.title,
@@ -36,6 +44,7 @@ export default async function(req) {
           content: gen.content || "",
           category_id: t.category_id,
           language: t.language,
+          cover_image: coverUrl,
           status: 'published',
           ai_generated: true,
           seo_title: gen.seo_title || gen.title,

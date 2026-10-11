@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import { slugify, uniqueSlug, buildArticlePrompt, articleSchema } from "../../shared/cms.ts";
+import { slugify, uniqueSlug, buildArticlePrompt, buildCoverPrompt, articleSchema } from "../../shared/cms.ts";
 
 export default async function(req) {
   try {
@@ -20,10 +20,18 @@ export default async function(req) {
 
     const category = await base44.entities.Category.get(categoryId);
 
-    const gen = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: buildArticlePrompt(topic, category.name, language),
-      response_json_schema: articleSchema
-    });
+    const [genRes, coverRes] = await Promise.allSettled([
+      base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: buildArticlePrompt(topic, category.name, language),
+        response_json_schema: articleSchema
+      }),
+      base44.asServiceRole.integrations.Core.GenerateImage({
+        prompt: buildCoverPrompt(topic)
+      })
+    ]);
+    if (genRes.status !== 'fulfilled') throw new Error('Falha ao gerar o texto');
+    const gen = genRes.value;
+    const coverUrl = coverRes.status === 'fulfilled' ? coverRes.value.url : '';
 
     const slug = uniqueSlug(slugify(gen.title));
     const article = await base44.entities.Article.create({
@@ -33,6 +41,7 @@ export default async function(req) {
       content: gen.content || "",
       category_id: categoryId,
       language,
+      cover_image: coverUrl,
       status: 'draft',
       ai_generated: true,
       seo_title: gen.seo_title || gen.title,

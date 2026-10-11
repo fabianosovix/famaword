@@ -47,3 +47,7 @@ Retorne EXATAMENTE este JSON:
 - seo_title: título SEO (até 60 caracteres)
 - seo_description: meta description (até 160 caracteres)`;
 }
+
+export function buildCoverPrompt(topic) {
+  return `Wide editorial cover image for a web article about: "${topic}". Modern, clean, professional, high quality, 16:9 landscape composition, no text, no watermark.`;
+}

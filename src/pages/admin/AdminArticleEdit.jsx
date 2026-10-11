@@ -10,6 +10,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { Loader2, Sparkles, Save, Upload, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { fileToCoverWebp, urlToCoverWebp } from '@/lib/coverImage';
 
 const QUILL_MODULES = {
   toolbar: [
@@ -38,6 +39,7 @@ export default function AdminArticleEdit() {
   const [aiCat, setAiCat] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [coverLoading, setCoverLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -64,13 +66,39 @@ export default function AdminArticleEdit() {
   const uploadCover = async (file) => {
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
+      const blob = await fileToCoverWebp(file);
+      const webpFile = new File([blob], 'cover.webp', { type: 'image/webp' });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file: webpFile });
       setForm((f) => ({ ...f, cover_image: file_url }));
-      toast({ title: 'Imagem enviada (stored publicly)' });
+      toast({ title: 'Capa enviada (stored publicly)' });
     } catch (err) {
       toast({ title: 'Erro no upload: ' + err.message, variant: 'destructive' });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const generateCover = async () => {
+    const topic = form.title || aiTopic;
+    if (!topic) return toast({ title: 'Informe o título do artigo primeiro', variant: 'destructive' });
+    setCoverLoading(true);
+    try {
+      const res = await base44.functions.invoke('generateCoverImage', { topic });
+      const url = res.data.url;
+      const result = await urlToCoverWebp(url);
+      if (result.blob) {
+        const webpFile = new File([result.blob], 'cover.webp', { type: 'image/webp' });
+        const { file_url } = await base44.integrations.Core.UploadPublicFile({ file: webpFile });
+        setForm((f) => ({ ...f, cover_image: file_url }));
+        toast({ title: 'Capa gerada por IA (stored publicly)' });
+      } else {
+        setForm((f) => ({ ...f, cover_image: result.fallback }));
+        toast({ title: 'Capa gerada por IA (URL original)' });
+      }
+    } catch (err) {
+      toast({ title: 'Erro: ' + (err.response?.data?.error || err.message), variant: 'destructive' });
+    } finally {
+      setCoverLoading(false);
     }
   };
 
@@ -174,12 +202,24 @@ export default function AdminArticleEdit() {
         </div>
         <div>
           <Label>Imagem de capa</Label>
-          <div className="flex items-center gap-3 mt-1">
-            <input type="file" accept="image/*" onChange={(e) => e.target.files[0] && uploadCover(e.target.files[0])}
-              className="text-sm" disabled={uploading} />
+          <p className="text-xs text-muted-foreground mt-1">Padrão obrigatório: 1200x675px, WebP. Uploads fora desse tamanho são recusados.</p>
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
+            <label className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-background text-sm cursor-pointer hover:bg-accent transition">
+              <Upload className="w-4 h-4" /> Enviar imagem
+              <input type="file" accept="image/webp,image/png,image/jpeg" onChange={(e) => e.target.files[0] && uploadCover(e.target.files[0])}
+                className="hidden" disabled={uploading || coverLoading} />
+            </label>
+            <Button type="button" variant="outline" onClick={generateCover} disabled={coverLoading || uploading}>
+              {coverLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              Gerar capa com IA
+            </Button>
             {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
           </div>
-          {form.cover_image && <img src={form.cover_image} alt="capa" className="mt-2 h-24 rounded-md object-cover" />}
+          {form.cover_image && (
+            <div className="mt-3 aspect-[16/9] w-full max-w-sm overflow-hidden rounded-lg bg-muted">
+              <img src={form.cover_image} alt="capa" className="w-full h-full object-cover" />
+            </div>
+          )}
         </div>
         <div>
           <Label>Conteúdo</Label>
