@@ -14,6 +14,7 @@ import settingsRouter from './routes/settings.js';
 import usersRouter from './routes/users.js';
 import aiRouter from './routes/ai.js';
 import mediaRouter from './routes/media.js';
+import sitemapRouter from './routes/sitemap.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
@@ -45,6 +46,9 @@ app.use('/api/media', requireAuth, mediaRouter);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true, version: config.version }));
+
+// SEO: sitemap.xml + robots.txt (dynamic, reflects latest published content)
+app.use(sitemapRouter);
 
 // --- Serve built frontend ---
 const distDir = path.join(root, 'dist');

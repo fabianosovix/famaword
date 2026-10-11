@@ -109,4 +109,5 @@ node server/scripts/import-csv.js categories categories.csv
 - Acesse `https://seusite.com.br/admin` para o painel administrativo
 - Configure categorias, editores e páginas institucionais
 - Configure o `ads.txt` nas configurações para monetização
+- **Sitemap e robots.txt são gerados automaticamente** em `/sitemap.xml` e `/robots.txt` — cadastre `https://seusite.com.br/sitemap.xml` no [Google Search Console](https://search.google.com/search-console) para indexação automática de novos artigos
 - Veja `UPDATE.md` para instruções de atualização
