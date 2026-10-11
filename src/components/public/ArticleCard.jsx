@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Image } from '@/components/ui/image';
+import { useTranslation } from '@/lib/i18n';
 
 export default function ArticleCard({ article, category }) {
+  const { t } = useTranslation();
   return (
     <Link to={`/artigo/${article.slug}`} className="group block">
       <article className="flex flex-col gap-3">
@@ -11,7 +13,7 @@ export default function ArticleCard({ article, category }) {
           </div>
         ) : (
           <div className="aspect-[16/9] rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-sm">
-            {category?.name || 'Artigo'}
+            {category?.name || t('article')}
           </div>
         )}
         {category && (

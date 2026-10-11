@@ -2,11 +2,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useSettings } from '@/lib/SettingsProvider';
+import { useTranslation } from '@/lib/i18n';
 import { Image } from '@/components/ui/image';
 import { Loader2, ChevronDown } from 'lucide-react';
 
 export default function PublicHeader() {
   const { settings } = useSettings();
+  const { t } = useTranslation();
   const [cats, setCats] = useState([]);
   const navigate = useNavigate();
 
@@ -42,7 +44,7 @@ export default function PublicHeader() {
             <Image src={settings.logo_url} alt={settings.site_name} className="h-8 w-auto max-w-[160px] object-contain" fittingType="fit" />
           ) : (
             <span className="font-heading font-bold text-lg truncate" style={{ color: 'var(--brand-primary)' }}>
-              {settings?.site_name || 'Meu Site'}
+              {settings?.site_name || t('site_name_default')}
             </span>
           )}
         </Link>
@@ -75,7 +77,7 @@ export default function PublicHeader() {
                       onClick={() => go(c.slug)}
                       className="block w-full text-left px-3 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-muted transition"
                     >
-                      Ver todos
+                      {t('see_all')}
                     </button>
                     {children.map((sub) => (
                       <button

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { useTranslation } from '@/lib/i18n';
 import { Loader2 } from 'lucide-react';
 
 export default function StaticPage() {
+  const { t } = useTranslation();
   const { slug } = useParams();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,7 +30,7 @@ export default function StaticPage() {
   }, [slug]);
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
-  if (notFound) return <p className="text-muted-foreground text-center py-20">Página não encontrada.</p>;
+  if (notFound) return <p className="text-muted-foreground text-center py-20">{t('page_not_found')}</p>;
 
   return (
     <article className="max-w-2xl mx-auto px-4 py-10">

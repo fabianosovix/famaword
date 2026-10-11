@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Image } from '@/components/ui/image';
+import { useTranslation } from '@/lib/i18n';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function ArticlePage() {
+  const { t } = useTranslation();
   const { slug } = useParams();
   const [article, setArticle] = useState(null);
   const [category, setCategory] = useState(null);
@@ -47,15 +49,15 @@ export default function ArticlePage() {
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
   if (notFound) return (
     <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-      <p className="text-muted-foreground mb-4">Artigo não encontrado.</p>
-      <Link to="/" className="text-sm underline">Voltar para a home</Link>
+      <p className="text-muted-foreground mb-4">{t('article_not_found')}</p>
+      <Link to="/" className="text-sm underline">{t('back_to_home')}</Link>
     </div>
   );
 
   return (
     <article className="max-w-2xl mx-auto px-4 py-8">
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition">
-        <ArrowLeft className="w-4 h-4" /> Voltar
+        <ArrowLeft className="w-4 h-4" /> {t('back')}
       </button>
       {category && (
         <Link to={`/categoria/${category.slug}`} className="text-xs font-semibold uppercase tracking-wider hover:underline" style={{ color: 'var(--brand-secondary)' }}>

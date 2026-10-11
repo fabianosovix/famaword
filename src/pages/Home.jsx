@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useSettings } from '@/lib/SettingsProvider';
+import { useTranslation } from '@/lib/i18n';
 import { Image } from '@/components/ui/image';
 import ArticleCard from '@/components/public/ArticleCard';
 import { Loader2 } from 'lucide-react';
 
 export default function Home() {
   const { settings } = useSettings();
+  const { t } = useTranslation();
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState({});
   const [loading, setLoading] = useState(true);
@@ -41,15 +43,15 @@ export default function Home() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <section className="mb-8">
         <h1 className="font-heading font-bold text-2xl mb-1" style={{ color: 'var(--brand-primary)' }}>
-          {settings?.site_name || 'Meu Site'}
+          {settings?.site_name || t('site_name_default')}
         </h1>
-        <p className="text-muted-foreground text-sm">As últimas publicações</p>
+        <p className="text-muted-foreground text-sm">{t('latest_publications')}</p>
       </section>
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
       ) : articles.length === 0 ? (
-        <p className="text-muted-foreground text-center py-20">Nenhum artigo publicado ainda.</p>
+        <p className="text-muted-foreground text-center py-20">{t('no_articles_published')}</p>
       ) : (
         <>
           {featured && (

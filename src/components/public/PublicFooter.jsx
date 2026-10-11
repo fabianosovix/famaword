@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useSettings } from '@/lib/SettingsProvider';
+import { useTranslation } from '@/lib/i18n';
 import { Facebook, Twitter, Instagram, Youtube, Linkedin } from 'lucide-react';
 
 const SOCIAL_ICONS = {
@@ -11,6 +12,7 @@ const SOCIAL_ICONS = {
 
 export default function PublicFooter() {
   const { settings } = useSettings();
+  const { t } = useTranslation();
   const [pages, setPages] = useState([]);
 
   useEffect(() => {
@@ -32,10 +34,10 @@ export default function PublicFooter() {
             <p className="font-heading font-bold text-base mb-2" style={{ color: 'var(--brand-primary)' }}>
               {settings?.site_name || 'Meu Site'}
             </p>
-            <p className="text-sm text-muted-foreground">{settings?.footer_text || 'Conteúdo de qualidade, publicado com rapidez.'}</p>
+            <p className="text-sm text-muted-foreground">{settings?.footer_text || t('footer_default')}</p>
           </div>
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Páginas</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{t('pages')}</p>
             {pages.map((p) => (
               <Link key={p.id} to={`/pagina/${p.slug}`} className="text-sm text-foreground/70 hover:text-foreground transition">
                 {p.title}
@@ -43,7 +45,7 @@ export default function PublicFooter() {
             ))}
           </div>
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Redes sociais</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{t('social_networks')}</p>
             <div className="flex gap-3">
               {Object.entries(socials).map(([key, url]) => {
                 if (!url) return null;
@@ -58,7 +60,7 @@ export default function PublicFooter() {
           </div>
         </div>
         <div className="mt-8 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {settings?.site_name || 'Meu Site'}. Todos os direitos reservados.
+          © {new Date().getFullYear()} {settings?.site_name || t('site_name_default')}. {t('all_rights_reserved')}
         </div>
       </div>
     </footer>
