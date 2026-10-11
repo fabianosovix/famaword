@@ -52,12 +52,13 @@ app.use(sitemapRouter);
 
 // --- Serve built frontend ---
 const distDir = path.join(root, 'dist');
-if (fs.existsSync(distDir)) {
+const indexFile = path.join(distDir, 'index.html');
+if (fs.existsSync(indexFile)) {
   app.use(express.static(distDir, { maxAge: '1h' }));
   // SPA fallback: any non-API route serves index.html
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) return next();
-    res.sendFile(path.join(distDir, 'index.html'));
+    res.sendFile(indexFile);
   });
 } else {
   app.get('*', (req, res) => {
