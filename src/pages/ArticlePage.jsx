@@ -82,7 +82,7 @@ export default function ArticlePage() {
       {editor && (
         <div className="mt-10 pt-6 border-t border-border flex items-start gap-4">
           <div className="w-14 h-14 rounded-full bg-muted overflow-hidden shrink-0">
-            {editor.photo ? <Image src={editor.photo} alt={editor.name} className="w-full h-full" fittingType="fill" /> : null}
+            {editor.photo ? <Image src={editor.photo} alt={editor.name} className="w-full h-full" fittingType="fill" width={56} height={56} originWidth={56} originHeight={56} /> : null}
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{t('written_by')}</p>

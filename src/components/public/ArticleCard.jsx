@@ -8,7 +8,7 @@ export default function ArticleCard({ article, category }) {
       <article className="flex flex-col gap-3">
         {article.cover_image ? (
           <div className="aspect-[16/9] overflow-hidden rounded-lg bg-muted">
-            <Image src={article.cover_image} alt={article.title} className="w-full h-full" fittingType="fill" originWidth={1200} originHeight={675} loading="lazy" />
+            <Image src={article.cover_image} alt={article.title} className="w-full h-full" fittingType="fill" width={1200} height={675} originWidth={1200} originHeight={675} loading="lazy" />
           </div>
         ) : (
           <div className="aspect-[16/9] rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-sm">

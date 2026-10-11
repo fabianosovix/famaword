@@ -58,7 +58,7 @@ export default function Home() {
               <article className="grid md:grid-cols-2 gap-6 items-center">
                 {featured.cover_image ? (
                   <div className="aspect-[16/9] overflow-hidden rounded-xl bg-muted">
-                    <Image src={featured.cover_image} alt={featured.title} className="w-full h-full" fittingType="fill" originWidth={1200} originHeight={675} loading="eager" fetchPriority="high" />
+                    <Image src={featured.cover_image} alt={featured.title} className="w-full h-full" fittingType="fill" width={1200} height={675} originWidth={1200} originHeight={675} loading="eager" fetchPriority="high" />
                   </div>
                 ) : (
                   <div className="aspect-[16/9] rounded-xl bg-muted" />

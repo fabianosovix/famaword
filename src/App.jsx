@@ -3,23 +3,23 @@ import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { SettingsProvider } from '@/lib/SettingsProvider';
-// Auth pages
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
-// Public site
+// Auth pages (lazy: public visitors don't download auth code)
+const Login = lazy(() => import('@/pages/Login'));
+const Register = lazy(() => import('@/pages/Register'));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+const UserNotRegisteredError = lazy(() => import('@/components/UserNotRegisteredError'));
+const PageNotFound = lazy(() => import('./lib/PageNotFound'));
+// Public site (Home eager = LCP-critical; other pages lazy)
 import PublicLayout from '@/components/public/PublicLayout';
 import Home from '@/pages/Home';
-import ArticlePage from '@/pages/ArticlePage';
-import CategoryPage from '@/pages/CategoryPage';
-import StaticPage from '@/pages/StaticPage';
+const ArticlePage = lazy(() => import('@/pages/ArticlePage'));
+const CategoryPage = lazy(() => import('@/pages/CategoryPage'));
+const StaticPage = lazy(() => import('@/pages/StaticPage'));
 // Admin (lazy-loaded: public visitors don't download admin code)
 const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
@@ -50,11 +50,12 @@ const AuthenticatedApp = () => {
   }
 
   if (authError && authError.type === 'user_not_registered') {
-    return <UserNotRegisteredError />;
+    return <Suspense fallback={<AdminFallback />}><UserNotRegisteredError /></Suspense>;
   }
 
   return (
     <SettingsProvider>
+      <Suspense fallback={<AdminFallback />}>
       <Routes>
         {/* Auth */}
         <Route path="/login" element={<Login />} />
@@ -88,6 +89,7 @@ const AuthenticatedApp = () => {
 
         <Route path="*" element={<PageNotFound />} />
       </Routes>
+      </Suspense>
     </SettingsProvider>
   );
 };
