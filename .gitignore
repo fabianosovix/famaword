@@ -37,3 +37,12 @@ dist-ssr
 
 # Local link to a Base44 app, written by `base44 link`
 base44/.app.jsonc
+
+# ── Self-hosted runtime data (never commit) ──
+/data
+/uploads
+/backups
+*.db
+*.db-shm
+*.db-wal
+server/node_modules
