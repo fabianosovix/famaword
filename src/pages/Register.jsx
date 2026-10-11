@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/selfHostedClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { UserPlus, Mail, Lock, Loader2, LockKeyhole } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
@@ -14,6 +14,15 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [closed, setClosed] = useState(false);
+
+  useEffect(() => {
+    base44.auth.registrationStatus()
+      .then((s) => setClosed(!s.registrationOpen))
+      .catch(() => setClosed(false))
+      .finally(() => setChecking(false));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +42,40 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <AuthLayout
+        icon={UserPlus}
+        title="Create your account"
+        subtitle="Sign up to get started"
+      >
+        <div className="flex justify-center py-6">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (closed) {
+    return (
+      <AuthLayout
+        icon={LockKeyhole}
+        title="Registration is closed"
+        subtitle="An administrator account already exists"
+        footer={
+          <Link to="/login" className="text-primary font-medium hover:underline">
+            Back to log in
+          </Link>
+        }
+      >
+        <p className="text-sm text-foreground text-center">
+          New accounts can only be created by an administrator from the admin
+          panel. Ask an admin for an invite.
+        </p>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout

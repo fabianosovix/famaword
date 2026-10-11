@@ -68,6 +68,13 @@ export function requireAdmin(req, res, next) {
 
 // --- Routes ---
 
+// GET /api/auth/status — public: whether initial registration is still open
+router.get('/status', (req, res) => {
+  const db = getDb();
+  const userCount = db.prepare('SELECT COUNT(*) as n FROM users').get().n;
+  res.json({ registrationOpen: userCount === 0 });
+});
+
 // POST /api/auth/register  (open during initial setup; admin-only after first user exists)
 router.post('/register', async (req, res, next) => {
   try {

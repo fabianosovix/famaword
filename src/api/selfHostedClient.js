@@ -182,6 +182,10 @@ const auth = {
     return request('/auth/me');
   },
 
+  async registrationStatus() {
+    return request('/auth/status');
+  },
+
   hasToken() {
     try { return !!localStorage.getItem(TOKEN_KEY); } catch { return false; }
   },

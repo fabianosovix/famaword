@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/selfHostedClient";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,15 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(true);
   // Post-login destination (same-origin paths only).
   const returnTo = safeReturnTo();
+
+  useEffect(() => {
+    base44.auth.registrationStatus()
+      .then((s) => setRegistrationOpen(s.registrationOpen))
+      .catch(() => setRegistrationOpen(false));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,15 +43,17 @@ export default function Login() {
       title="Welcome back"
       subtitle="Log in to your account"
       footer={
-        <>
-          Don't have an account?{" "}
-          <Link
-            to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
-            className="text-primary font-medium hover:underline"
-          >
-            Create one
-          </Link>
-        </>
+        registrationOpen ? (
+          <>
+            Don't have an account?{" "}
+            <Link
+              to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
+              className="text-primary font-medium hover:underline"
+            >
+              Create one
+            </Link>
+          </>
+        ) : null
       }
     >
       {error && (
