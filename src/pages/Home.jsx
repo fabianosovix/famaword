@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useSettings } from '@/lib/SettingsProvider';
 import { useTranslation } from '@/lib/i18n';
@@ -55,7 +54,7 @@ export default function Home() {
       ) : (
         <>
           {featured && (
-            <Link to={`/artigo/${featured.slug}`} className="group block mb-10">
+            <a href={`/artigo/${featured.slug}`} className="group block mb-10">
               <article className="grid md:grid-cols-2 gap-6 items-center">
                 {featured.cover_image ? (
                   <div className="aspect-[16/9] overflow-hidden rounded-xl bg-muted">
@@ -76,7 +75,7 @@ export default function Home() {
                   {featured.summary && <p className="text-muted-foreground mt-3">{featured.summary}</p>}
                 </div>
               </article>
-            </Link>
+            </a>
           )}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
             {rest.map((a) => (

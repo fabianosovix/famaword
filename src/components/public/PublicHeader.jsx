@@ -1,4 +1,3 @@
-import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useSettings } from '@/lib/SettingsProvider';
@@ -11,7 +10,6 @@ export default function PublicHeader() {
   const { t } = useTranslation();
   const [cats, setCats] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -36,8 +34,7 @@ export default function PublicHeader() {
   });
 
   const go = (slug) => {
-    navigate(`/categoria/${slug}`);
-    setMobileOpen(false);
+    window.location.href = `/categoria/${slug}`;
   };
 
   const renderItem = (c, isSub = false) => {
@@ -76,7 +73,7 @@ export default function PublicHeader() {
   return (
     <header className="border-b border-border bg-background sticky top-0 z-30">
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2 min-w-0">
+        <a href="/" className="flex items-center gap-2 min-w-0">
           {settings?.logo_url ? (
             <Image src={settings.logo_url} alt={settings.site_name} className="h-8 w-auto max-w-[160px] object-contain" fittingType="fit" />
           ) : (
@@ -84,7 +81,7 @@ export default function PublicHeader() {
               {settings?.site_name || t('site_name_default')}
             </span>
           )}
-        </Link>
+        </a>
 
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-1 sm:gap-2 overflow-visible">

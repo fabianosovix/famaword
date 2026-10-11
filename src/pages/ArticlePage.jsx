@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Image } from '@/components/ui/image';
 import { useTranslation } from '@/lib/i18n';
@@ -55,7 +55,7 @@ export default function ArticlePage() {
   if (notFound) return (
     <div className="max-w-2xl mx-auto px-4 py-20 text-center">
       <p className="text-muted-foreground mb-4">{t('article_not_found')}</p>
-      <Link to="/" className="text-sm underline">{t('back_to_home')}</Link>
+      <a href="/" className="text-sm underline">{t('back_to_home')}</a>
     </div>
   );
 

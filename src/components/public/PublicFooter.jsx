@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useSettings } from '@/lib/SettingsProvider';
@@ -39,9 +38,9 @@ export default function PublicFooter() {
           <div className="flex flex-col gap-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{t('pages')}</p>
             {pages.map((p) => (
-              <Link key={p.id} to={`/pagina/${p.slug}`} className="text-sm text-foreground/70 hover:text-foreground transition">
+              <a key={p.id} href={`/pagina/${p.slug}`} className="text-sm text-foreground/70 hover:text-foreground transition">
                 {p.title}
-              </Link>
+              </a>
             ))}
           </div>
           <div className="flex flex-col gap-2">

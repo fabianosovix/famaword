@@ -1,11 +1,10 @@
-import { Link } from 'react-router-dom';
 import { Image } from '@/components/ui/image';
 import { useTranslation } from '@/lib/i18n';
 
 export default function ArticleCard({ article, category }) {
   const { t } = useTranslation();
   return (
-    <Link to={`/artigo/${article.slug}`} className="group block">
+    <a href={`/artigo/${article.slug}`} className="group block">
       <article className="flex flex-col gap-3">
         {article.cover_image ? (
           <div className="aspect-[16/9] overflow-hidden rounded-lg bg-muted">
@@ -26,6 +25,6 @@ export default function ArticleCard({ article, category }) {
         </h2>
         {article.summary && <p className="text-sm text-muted-foreground line-clamp-2">{article.summary}</p>}
       </article>
-    </Link>
+    </a>
   );
 }
