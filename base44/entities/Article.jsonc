@@ -26,6 +26,18 @@
       "type": "string",
       "title": "Categoria"
     },
+    "language": {
+      "type": "string",
+      "title": "Idioma",
+      "enum": [
+        "pt-BR",
+        "es",
+        "en",
+        "fr",
+        "ar"
+      ],
+      "default": "pt-BR"
+    },
     "status": {
       "type": "string",
       "title": "Status",

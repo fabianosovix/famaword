@@ -14,10 +14,10 @@ export default async function(req) {
 
     const tasks = [];
     for (const s of schedulesRes.items || []) {
-      tasks.push({ topic: s.topic, category_id: s.category_id, source: 'schedule', id: s.id });
+      tasks.push({ topic: s.topic, category_id: s.category_id, language: s.language || 'pt-BR', source: 'schedule', id: s.id });
     }
     for (const q of queueRes.items || []) {
-      tasks.push({ topic: q.topic, category_id: q.category_id, source: 'queue', id: q.id });
+      tasks.push({ topic: q.topic, category_id: q.category_id, language: q.language || 'pt-BR', source: 'queue', id: q.id });
     }
 
     const results = [];
@@ -25,7 +25,7 @@ export default async function(req) {
       try {
         const category = await svc.entities.Category.get(t.category_id);
         const gen = await svc.integrations.Core.InvokeLLM({
-          prompt: buildArticlePrompt(t.topic, category.name),
+          prompt: buildArticlePrompt(t.topic, category.name, t.language),
           response_json_schema: articleSchema
         });
         const slug = uniqueSlug(slugify(gen.title));
@@ -35,6 +35,7 @@ export default async function(req) {
           summary: gen.summary || "",
           content: gen.content || "",
           category_id: t.category_id,
+          language: t.language,
           status: 'published',
           ai_generated: true,
           seo_title: gen.seo_title || gen.title,

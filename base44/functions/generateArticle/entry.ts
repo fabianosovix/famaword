@@ -13,6 +13,7 @@ export default async function(req) {
     const body = await req.json().catch(() => ({}));
     const topic = body.topic;
     const categoryId = body.category_id;
+    const language = body.language || 'pt-BR';
     if (!topic || !categoryId) {
       return Response.json({ error: 'topic e category_id são obrigatórios' }, { status: 400 });
     }
@@ -20,7 +21,7 @@ export default async function(req) {
     const category = await base44.entities.Category.get(categoryId);
 
     const gen = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: buildArticlePrompt(topic, category.name),
+      prompt: buildArticlePrompt(topic, category.name, language),
       response_json_schema: articleSchema
     });
 
@@ -31,6 +32,7 @@ export default async function(req) {
       summary: gen.summary || "",
       content: gen.content || "",
       category_id: categoryId,
+      language,
       status: 'draft',
       ai_generated: true,
       seo_title: gen.seo_title || gen.title,

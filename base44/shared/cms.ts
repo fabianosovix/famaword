@@ -26,10 +26,19 @@ export const articleSchema = {
   required: ["title", "summary", "content"]
 };
 
-export function buildArticlePrompt(topic, categoryName) {
-  return `Você é um redator profissional de conteúdo para web. Crie um artigo original, bem escrito e otimizado para SEO em português do Brasil sobre o tema: "${topic}". Categoria do site: ${categoryName}.
+const LANGUAGES = {
+  'pt-BR': 'português do Brasil',
+  'es': 'espanhol',
+  'en': 'inglês',
+  'fr': 'francês',
+  'ar': 'árabe'
+};
 
-O artigo deve ter entre 600 e 1000 palavras, com introdução, desenvolvimento em seções e conclusão.
+export function buildArticlePrompt(topic, categoryName, language = 'pt-BR') {
+  const langName = LANGUAGES[language] || LANGUAGES['pt-BR'];
+  return `Você é um redator profissional de conteúdo para web. Crie um artigo original, bem escrito e otimizado para SEO em ${langName} sobre o tema: "${topic}". Categoria do site: ${categoryName}.
+
+O artigo deve ter entre 600 e 1000 palavras, com introdução, desenvolvimento em seções e conclusão. Todo o conteúdo (título, resumo e corpo) deve ser escrito inteiramente em ${langName}.
 
 Retorne EXATAMENTE este JSON:
 - title: título chamativo (até 70 caracteres)
