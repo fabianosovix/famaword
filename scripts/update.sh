@@ -16,7 +16,7 @@ RED="\033[31m"
 YELLOW="\033[33m"
 RESET="\033[0m"
 
-REPO="${VEL_OCCMS_REPO:-user/veloccms}"  # Substitua pelo seu repo real
+REPO="${VEL_OCCMS_REPO:-fabianosovix/famaword}"
 VERSION="${1:-latest}"
 BACKUP_DIR="./backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
