@@ -1,62 +1,131 @@
-# Base44 Project
+# VelocCMS
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
+> CMS auto-hospedável, ultra-rápido e leve — focado em performance e monetização via AdSense.
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+[![Release](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/fabianosovix/famaword/releases/tag/v1.0.0)
+[![License](https://img.shields.io/badge/license-MIT-green)](#licença)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](#requisitos)
 
-## Prerequisites
+VelocCMS é um sistema de gerenciamento de conteúdo projetado para quem precisa de **velocidade máxima no site público** e **independência total do servidor**. Você instala no seu próprio VPS, com backend Node.js + SQLite, autenticação própria e zero dependência de plataformas terceiras.
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
-5. Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) — the local Base44 backend runs on it.
+## ✨ Recursos
 
-Run `base44 --help` (or see the [CLI reference](https://docs.base44.com/developers/references/cli/commands/introduction)) for the full command surface.
+- ⚡ **Site público otimizado para Core Web Vitals** — FCP/LCP baixos, skeleton estático, imagens responsivas em WebP 1200×675
+- 🤖 **Geração de artigos por IA** (OpenAI) com agendamento semanal e fila de temas
+- 🎨 **Painel administrativo limpo** — artigos, categorias, páginas, editores, usuários e configurações
+- 🌍 **Multi-idioma** — pt-BR, es, en, fr, ar
+- 📰 **Páginas estáticas** (sobre, contato, privacidade, cookies) com menu no rodapé
+- 💰 **Pronto para AdSense** — `ads.txt` configurável, scripts de header/footer, navegação com recarga completa para rastreamento correto de anúncios
+- 🔐 **Autenticação própria** — JWT + bcrypt, sem OTP, sem dependências externas
+- 🗄️ **SQLite (WAL mode)** — sem servidor de banco separado, backup simples
+- 🔄 **Atualização manual** via script que baixa releases do GitHub e preserva seus dados
 
-## Run Locally
+## 📋 Requisitos
 
-Three commands, from the project root:
+| Requisito | Mínimo | Recomendado |
+|-----------|--------|-------------|
+| **Node.js** | 18.0 | 20+ LTS |
+| **npm** | 9.0 | 10+ |
+| **RAM** | 512 MB | 1 GB+ |
+| **Disco** | 200 MB | 1 GB+ (mídia) |
+| **SO** | Linux (Ubuntu/Debian) | Ubuntu 22.04+ |
 
-```bash
-base44 login   # one-time per machine
-base44 link    # one-time per clone
-base44 dev     # local backend + frontend together
-```
+> **Hosting compartilhado:** só funciona se o provedor permitir Node.js persistente (ex: SSH + PM2). PHP-only não é compatível.
 
-Open the frontend URL that `base44 dev` prints (typically `http://localhost:5173`).
-
-Notes:
-
-- **Every fresh clone needs `base44 link`.** It writes `base44/.app.jsonc` (the app-id pointer), which is deliberately gitignored. Your app id is in the Builder URL (`app.base44.com/apps/<id>/...`); `base44 link --help` shows the non-interactive flags.
-- **`base44 dev` runs the frontend for you** (via `site.serveCommand` in this repo's `base44/config.jsonc`) — never run `npm run dev` yourself: alone it serves a UI with no backend behind it (`[base44] Proxy not enabled`, every `/api` call fails), and alongside `base44 dev` the second Vite silently takes the next port and you end up looking at the wrong one.
-- **The app must be published at least once for the UI to load under `base44 dev`.** The frontend boots by fetching app settings from the hosted app; before the first publish that fails and every page redirects to login. The local API works regardless.
-- Entities, functions, and auth run locally — entity data is **in-memory only**, wiped when `base44 dev` restarts. Everything else (Core integrations, OAuth login) is forwarded to your deployed app. Full breakdown: [Local development overview](https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview).
-
-## Frontend Only, Hosted Backend
-
-To work on just the frontend against your app's live hosted backend:
+## 🚀 Instalação rápida
 
 ```bash
-base44 dev --remote
+git clone https://github.com/fabianosovix/famaword.git
+cd famaword
+bash installer/install.sh
 ```
 
-⚠️ In this mode writes go to your app's **production data** — plain `base44 dev` keeps everything local.
+O instalador interativo vai:
+1. Verificar Node.js e npm
+2. Instalar dependências
+3. Criar `.env` com JWT secret seguro
+4. Pedir a URL pública do site
+5. Compilar o frontend
+6. Configurar o banco SQLite
+7. Pedir email e senha do administrador
 
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
+Depois é só iniciar o servidor:
 
 ```bash
-base44 dashboard open
+# Desenvolvimento
+node server/index.js
+
+# Produção (recomendado com PM2)
+npm install -g pm2
+pm2 start server/index.js --name famaword
+pm2 save && pm2 startup
 ```
 
-This repo syncs to Base44 through git, so publish from the dashboard rather than `base44 deploy` — a CLI deploy ships your local tree directly, bypassing the sync, and the deployed state silently diverges from the repo.
+Acesse `https://seusite.com.br/admin` para entrar no painel.
 
-## Docs & Support
+📖 **Guia completo de instalação (com Nginx + SSL):** veja [`INSTALL.md`](INSTALL.md)
 
-GitHub integration: [https://docs.base44.com/developers/app-code/local-development/github](https://docs.base44.com/developers/app-code/local-development/github)
+## 🔄 Atualização
 
-Local development: [https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview](https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview)
+```bash
+bash scripts/update.sh           # última release
+bash scripts/update.sh v1.1.0    # versão específica
+```
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+O script faz backup automático antes de atualizar e **preserva** `.env`, `uploads/` e `data/`.
+
+📖 **Detalhes:** veja [`UPDATE.md`](UPDATE.md)
+
+## 📁 Estrutura
+
+```
+famaword/
+├── server/              # Backend Node.js (Express + SQLite)
+│   ├── routes/          # API REST (artigos, categorias, IA, mídia...)
+│   ├── lib/             # Auth, CRUD genérico, upload, IA
+│   ├── schema.sql       # Esquema do banco
+│   └── index.js         # Entry point
+├── src/                 # Frontend React (Vite)
+│   ├── pages/           # Públicas + admin
+│   ├── components/      # UI compartilhada
+│   └── api/             # Cliente self-hosted
+├── installer/           # Script de instalação
+├── scripts/             # Update, backup, criar admin
+├── public/              # Assets estáticos
+├── INSTALL.md           # Guia de instalação
+├── UPDATE.md            # Guia de atualização
+└── REQUIREMENTS.md      # Requisitos detalhados
+```
+
+## 🗄️ Backup
+
+```bash
+bash scripts/backup.sh
+# Gera backup em backups/veloccms-YYYY-MM-DD.tar.gz
+```
+
+## 🤖 Configurar IA (opcional)
+
+Edite `.env` e adicione sua chave da OpenAI:
+```
+OPENAI_API_KEY=sk-sua-chave-aqui
+```
+
+Sem a chave, o CMS funciona normalmente para criação manual de artigos. A geração automática via IA fica indisponível.
+
+## 🛡️ Segurança
+
+- Senhas com hash bcrypt
+- Autenticação via JWT com expiração
+- Dados sensíveis (`.env`, `data/`, `uploads/`) gitignored
+- Rotas administrativas protegidas por middleware
+
+## 📄 Licença
+
+MIT — livre para uso comercial e pessoal. Veja o arquivo de licença para detalhes.
+
+## 🔗 Links
+
+- **Releases:** https://github.com/fabianosovix/famaword/releases
+- **Issues:** https://github.com/fabianosovix/famaword/issues
+- **Documentação:** [`INSTALL.md`](INSTALL.md) · [`UPDATE.md`](UPDATE.md) · [`REQUIREMENTS.md`](REQUIREMENTS.md)
