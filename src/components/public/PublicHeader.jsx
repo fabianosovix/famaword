@@ -46,7 +46,7 @@ export default function PublicHeader() {
             </span>
           )}
         </Link>
-        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
+        <nav className="flex items-center gap-1 sm:gap-2 overflow-visible">
           {topLevel.map((c) => {
             const children = childrenByParent[c.id] || [];
             if (children.length === 0) {
