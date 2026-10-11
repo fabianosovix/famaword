@@ -18,13 +18,13 @@ export default function CategoryPage() {
       setLoading(true);
       setNotFound(false);
       try {
-        const catRes = await base44.entities.Category.filter({ slug }, { limit: 1 });
+        const catRes = await base44.entities.Category.filter({ slug }, { limit: 1, fields: ['id', 'name', 'slug', 'description'] });
         const c = (catRes.items || [])[0];
         if (!c) { setNotFound(true); return; }
         setCategory(c);
         const artRes = await base44.entities.Article.filter(
           { category_id: c.id, status: 'published' },
-          { sort: '-created_date', limit: 50 }
+          { sort: '-created_date', limit: 50, fields: ['id', 'title', 'slug', 'summary', 'cover_image', 'category_id'] }
         );
         setArticles(artRes.items || []);
       } catch (e) {

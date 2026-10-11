@@ -17,7 +17,7 @@ export default function PublicFooter() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await base44.entities.Page.filter({ in_footer_menu: true }, { sort: 'order', limit: 20 });
+        const res = await base44.entities.Page.filter({ in_footer_menu: true }, { sort: 'order', limit: 20, fields: ['id', 'title', 'slug'] });
         setPages(res.items || []);
       } catch (e) { setPages([]); }
     })();

@@ -14,7 +14,7 @@ export default function PublicHeader() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await base44.entities.Category.filter({ in_main_menu: true }, { sort: 'order', limit: 100 });
+        const res = await base44.entities.Category.filter({ in_main_menu: true }, { sort: 'order', limit: 100, fields: ['id', 'name', 'slug', 'parent_id'] });
         setCats(res.items || []);
       } catch (e) { setCats([]); }
     })();

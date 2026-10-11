@@ -2,15 +2,39 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111'/%3E%3C/svg%3E" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Conteúdo de qualidade, publicado com rapidez." />
+    <meta name="theme-color" content="#111111" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="preconnect" href="https://media.base44.com" crossorigin />
     <link rel="dns-prefetch" href="https://media.base44.com" />
-    <title>Base44 APP</title>
+    <title>VelocCMS</title>
+    <style>
+      .__skel{min-height:100vh;display:flex;flex-direction:column;font-family:system-ui,sans-serif}
+      .__skel-h{height:64px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;padding:0 16px;max-width:1024px;margin:0 auto;width:100%;box-sizing:border-box}
+      .__skel-bar{width:140px;height:20px;background:#f3f4f6;border-radius:4px}
+      .__skel-m{max-width:1024px;margin:0 auto;padding:32px 16px;flex:1;width:100%;box-sizing:border-box}
+      .__skel-t{width:200px;height:28px;background:#f3f4f6;border-radius:4px;margin-bottom:32px}
+      .__skel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
+      .__skel-card{aspect-ratio:16/9;background:#f3f4f6;border-radius:8px}
+      @media(prefers-color-scheme:dark){.__skel-h{border-color:#374151}.__skel-bar,.__skel-t,.__skel-card{background:#1f2937}}
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="__skel">
+        <div class="__skel-h"><div class="__skel-bar"></div></div>
+        <div class="__skel-m">
+          <div class="__skel-t"></div>
+          <div class="__skel-grid">
+            <div class="__skel-card"></div>
+            <div class="__skel-card"></div>
+            <div class="__skel-card"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

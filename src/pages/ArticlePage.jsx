@@ -17,17 +17,15 @@ export default function ArticlePage() {
     (async () => {
       setLoading(true);
       setNotFound(false);
+      setEditor(null);
       try {
-        const res = await base44.entities.Article.filter({ slug, status: 'published' }, { limit: 1 });
+        const res = await base44.entities.Article.filter(
+          { slug, status: 'published' },
+          { limit: 1, fields: ['id', 'title', 'slug', 'summary', 'content', 'cover_image', 'category_id', 'editor_id', 'seo_title', 'seo_description'] }
+        );
         const a = (res.items || [])[0];
         if (!a) { setNotFound(true); return; }
         setArticle(a);
-        if (a.editor_id) {
-          try {
-            const ed = await base44.entities.Editor.get(a.editor_id);
-            setEditor(ed);
-          } catch (e) {}
-        }
       } catch (e) {
         setNotFound(true);
       } finally {
@@ -35,6 +33,18 @@ export default function ArticlePage() {
       }
     })();
   }, [slug]);
+
+  useEffect(() => {
+    if (!article?.editor_id) { setEditor(null); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const ed = await base44.entities.Editor.get(article.editor_id);
+        if (!cancelled) setEditor(ed);
+      } catch (e) {}
+    })();
+    return () => { cancelled = true; };
+  }, [article]);
 
   useEffect(() => {
     if (article) {

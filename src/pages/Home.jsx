@@ -16,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       try {
-        const catRes = await base44.entities.Category.filter({ in_main_menu: true }, { limit: 100 });
+        const catRes = await base44.entities.Category.filter({ in_main_menu: true }, { limit: 100, fields: ['id', 'name', 'slug', 'parent_id'] });
         const cats = catRes.items || [];
         const catMap = {};
         cats.forEach((c) => (catMap[c.id] = c));
@@ -24,7 +24,7 @@ export default function Home() {
         if (ids.length === 0) { setArticles([]); return; }
         const artRes = await base44.entities.Article.filter(
           { category_id: { $in: ids }, status: 'published' },
-          { sort: '-created_date', limit: 24 }
+          { sort: '-created_date', limit: 24, fields: ['id', 'title', 'slug', 'summary', 'cover_image', 'category_id'] }
         );
         setArticles(artRes.items || []);
         setCategories(catMap);
