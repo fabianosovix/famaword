@@ -41,6 +41,12 @@ export default function ArticlePage() {
       document.title = article.seo_title || article.title;
       const meta = document.querySelector('meta[name="description"]');
       if (meta) meta.setAttribute('content', article.seo_description || article.summary || '');
+      // Optimize content images: lazy-load + async decode to reduce render-blocking
+      const imgs = document.querySelectorAll('.prose-content img');
+      imgs.forEach((img) => {
+        img.setAttribute('loading', 'lazy');
+        img.setAttribute('decoding', 'async');
+      });
     }
     return () => { document.title = ''; };
   }, [article]);

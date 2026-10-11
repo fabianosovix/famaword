@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -19,17 +20,23 @@ import Home from '@/pages/Home';
 import ArticlePage from '@/pages/ArticlePage';
 import CategoryPage from '@/pages/CategoryPage';
 import StaticPage from '@/pages/StaticPage';
-// Admin
-import AdminLayout from '@/components/admin/AdminLayout';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminArticles from '@/pages/admin/AdminArticles';
-import AdminArticleEdit from '@/pages/admin/AdminArticleEdit';
-import AdminCategories from '@/pages/admin/AdminCategories';
-import AdminPages from '@/pages/admin/AdminPages';
-import AdminUsers from '@/pages/admin/AdminUsers';
-import AdminSettings from '@/pages/admin/AdminSettings';
-import AdminAI from '@/pages/admin/AdminAI';
-import AdminEditors from '@/pages/admin/AdminEditors';
+// Admin (lazy-loaded: public visitors don't download admin code)
+const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminArticles = lazy(() => import('@/pages/admin/AdminArticles'));
+const AdminArticleEdit = lazy(() => import('@/pages/admin/AdminArticleEdit'));
+const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories'));
+const AdminPages = lazy(() => import('@/pages/admin/AdminPages'));
+const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
+const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
+const AdminAI = lazy(() => import('@/pages/admin/AdminAI'));
+const AdminEditors = lazy(() => import('@/pages/admin/AdminEditors'));
+
+const AdminFallback = () => (
+  <div className="fixed inset-0 flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
@@ -65,7 +72,7 @@ const AuthenticatedApp = () => {
 
         {/* Admin panel */}
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-          <Route element={<AdminLayout />}>
+          <Route element={<Suspense fallback={<AdminFallback />}><AdminLayout /></Suspense>}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/artigos" element={<AdminArticles />} />
             <Route path="/admin/artigos/novo" element={<AdminArticleEdit />} />
