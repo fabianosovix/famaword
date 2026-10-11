@@ -96,6 +96,17 @@ ${urls.map(u => `  <url>
   } catch (e) { next(e); }
 });
 
+// GET /ads.txt
+router.get('/ads.txt', (req, res, next) => {
+  try {
+    const row = getDb().prepare('SELECT ads_txt FROM settings WHERE id = 1').get();
+    const body = (row && row.ads_txt) || '';
+    res.set('Content-Type', 'text/plain; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.send(body);
+  } catch (e) { next(e); }
+});
+
 // GET /robots.txt
 router.get('/robots.txt', (req, res, next) => {
   try {
