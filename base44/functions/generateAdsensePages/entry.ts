@@ -41,7 +41,7 @@ export default async function(req) {
     for (let i = 0; i < PAGE_DEFS.length; i++) {
       const def = PAGE_DEFS[i];
       const existing = await base44.entities.Page.filter({ slug: def.slug });
-      if (existing.items.length > 0) {
+      if (existing.length > 0) {
         skipped.push(def.slug);
         continue;
       }
