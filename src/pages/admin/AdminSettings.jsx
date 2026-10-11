@@ -67,8 +67,10 @@ export default function AdminSettings() {
         setSettingsId(rec.id);
       }
       toast({ title: 'Configurações salvas' });
+      await load();
     } catch (err) {
-      toast({ title: 'Erro: ' + err.message, variant: 'destructive' });
+      const msg = err?.message || 'Não foi possível salvar. Verifique sua conexão e tente novamente.';
+      toast({ title: 'Erro ao salvar', description: msg, variant: 'destructive' });
     } finally {
       setSaving(false);
     }

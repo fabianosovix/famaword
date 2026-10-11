@@ -76,6 +76,22 @@ function encodeCursor(offset) {
   return btoa(String(offset));
 }
 
+// --- Settings API (singleton: GET / and PUT /) ---
+class SettingsAPI {
+  async list() {
+    const row = await request('/settings');
+    return { items: row && Object.keys(row).length ? [row] : [], next_cursor: null, has_more: false };
+  }
+  async filter() { return this.list(); }
+  async get() { return request('/settings'); }
+  async create(data) {
+    return request('/settings', { method: 'PUT', body: JSON.stringify(data) });
+  }
+  async update(id, data) {
+    return request('/settings', { method: 'PUT', body: JSON.stringify(data) });
+  }
+}
+
 // --- Entity API ---
 class EntityAPI {
   constructor(name) {
@@ -360,7 +376,7 @@ export const base44 = {
     Category: new EntityAPI('categories'),
     Page: new EntityAPI('pages'),
     Editor: new EntityAPI('editors'),
-    SiteSettings: new EntityAPI('settings'),
+    SiteSettings: new SettingsAPI(),
     AIQueue: new EntityAPI('ai_queue'),
     AISchedule: new EntityAPI('ai_schedule'),
     User: new EntityAPI('users'),
