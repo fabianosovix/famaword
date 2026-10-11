@@ -11,6 +11,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      '@/api/base44Client': path.resolve(__dirname, 'src/api/selfHostedClient.js'),
       '@': path.resolve(__dirname, 'src'),
     },
   },
