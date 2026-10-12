@@ -10,6 +10,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import generatedCover from '@/lib/generatedCover';
+import waitForCover from '@/lib/waitForCover';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 // Use the same storage key as @base44/sdk's getAccessToken so the
@@ -313,11 +314,8 @@ const integrations = {
     },
 
     async GenerateImage({ prompt }) {
-      // Use the AI cover generation endpoint
-      return request('/ai/generate-cover', {
-        method: 'POST',
-        body: JSON.stringify({ prompt }),
-      });
+      const result = await functions.invoke('generateCoverImage', { topic: prompt });
+      return result.data;
     },
 
     async GenerateSpeech() {
@@ -340,7 +338,7 @@ const integrations = {
 
 // --- Functions ---
 const functions = {
-  async invoke(name, data = {}) {
+  async invoke(name, data = {}, { onProgress } = {}) {
     // Map known function names to server endpoints
     const endpoints = {
       generateArticle: '/ai/generate-article',
@@ -350,7 +348,11 @@ const functions = {
     };
     const endpoint = endpoints[name];
     if (!endpoint) throw new Error(`Function "${name}" not found`);
-    const result = await request(endpoint, { method: 'POST', body: JSON.stringify(data) });
+    let result = await request(endpoint, { method: 'POST', body: JSON.stringify(data) });
+    if (name === 'generateCoverImage' && result.job_id) {
+      onProgress?.('Gerando a imagem com IA. Isso pode levar alguns minutos...');
+      result = await waitForCover(result.job_id, request);
+    }
     const source = name === 'generateCoverImage' ? result.url
       : name === 'generateArticle' ? result.cover_source : null;
     if (source) {
@@ -358,7 +360,7 @@ const functions = {
       const persist = articleId ? url => request(`/articles/${articleId}`, {
         method: 'PUT', body: JSON.stringify({ cover_image: url }),
       }) : null;
-      const url = await generatedCover(source, uploadFile, persist);
+      const url = await generatedCover(source, uploadFile, persist, onProgress);
       if (name === 'generateArticle') {
         result.article.cover_image = url;
         delete result.cover_source;

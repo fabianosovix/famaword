@@ -111,6 +111,7 @@ async function openaiImage({ prompt, size, cfg }) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.apiKey}` },
     body: JSON.stringify({ model: cfg.model, prompt, n: 1, size }),
+    signal: AbortSignal.timeout(180000),
   });
   if (!res.ok) {
     const err = await res.text();
@@ -121,7 +122,7 @@ async function openaiImage({ prompt, size, cfg }) {
   if (image?.b64_json) return Buffer.from(image.b64_json, 'base64');
   const imageUrl = image?.url;
   if (!imageUrl) throw new Error('A IA não retornou uma imagem.');
-  const imgRes = await fetch(imageUrl);
+  const imgRes = await fetch(imageUrl, { signal: AbortSignal.timeout(30000) });
   if (!imgRes.ok) throw new Error('Failed to download generated image');
   return Buffer.from(await imgRes.arrayBuffer());
 }
@@ -135,6 +136,7 @@ async function geminiImage({ prompt, cfg }) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(180000),
   });
   if (!res.ok) {
     const err = await res.text();

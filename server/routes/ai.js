@@ -5,6 +5,7 @@ import { chatCompletion, generateImageSource } from '../lib/ai.js';
 import { slugify, uniqueSlug } from '../lib/slug.js';
 
 import { resolveArticleRelations } from '../lib/articleRelations.js';
+import { startCoverJob, readCoverJob } from '../lib/coverJobs.js';
 
 const router = express.Router();
 
@@ -75,19 +76,26 @@ Responda em JSON com este formato:
   } catch (e) { next(e); }
 });
 
-// Generate a temporary source; persistence happens after WebP conversion.
-router.post('/generate-cover', async (req, res, next) => {
+// Start quickly; the client polls while the provider works in the background.
+router.post('/generate-cover', (req, res, next) => {
   try {
-    const { article_id, topic } = req.body;
+    const { article_id, topic, prompt } = req.body;
     const article = article_id
       ? getDb().prepare('SELECT title FROM articles WHERE id = ?').get(article_id)
       : null;
     if (article_id && !article) return res.status(404).json({ message: 'Article not found' });
-    const title = topic || article?.title;
-    if (!title) return res.status(400).json({ message: 'Informe o título ou o artigo para gerar a capa.' });
-    const url = await generateImageSource(`Capa de artigo profissional sobre "${title}", estilo editorial moderno, 16:9, sem texto`);
-    res.json({ ok: true, url, article_id });
+    const title = topic || prompt || article?.title;
+    if (!title || typeof title !== 'string') return res.status(400).json({ message: 'Informe o título ou o artigo para gerar a capa.' });
+    const job_id = startCoverJob(req.user.id, title, article_id);
+    res.status(202).json({ ok: true, job_id });
   } catch (e) { next(e); }
+});
+
+router.get('/cover-jobs/:id', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const job = readCoverJob(req.params.id, req.user.id);
+  if (!job) return res.status(404).json({ message: 'A geração expirou ou o servidor foi reiniciado. Gere a capa novamente.' });
+  res.json(job);
 });
 
 // POST /api/ai/run-scheduled — process scheduled AI tasks for today

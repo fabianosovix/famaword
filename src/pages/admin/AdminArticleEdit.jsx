@@ -11,6 +11,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import { Loader2, Sparkles, Save, Upload, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { fileToCoverWebp } from '@/lib/coverImage';
+import CoverGenerationStatus from '@/components/admin/CoverGenerationStatus';
 
 const QUILL_MODULES = {
   toolbar: [
@@ -41,6 +42,8 @@ export default function AdminArticleEdit() {
   const [aiLoading, setAiLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [coverLoading, setCoverLoading] = useState(false);
+  const [coverProgress, setCoverProgress] = useState('');
+  const [coverError, setCoverError] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -85,17 +88,21 @@ export default function AdminArticleEdit() {
   const generateCover = async () => {
     const topic = form.title || aiTopic;
     if (!topic) return toast({ title: 'Informe o título do artigo primeiro', variant: 'destructive' });
+    setCoverError('');
+    setCoverProgress('Iniciando a geração da capa...');
     setCoverLoading(true);
     try {
       const res = await base44.functions.invoke('generateCoverImage', {
         topic, ...(!isNew ? { article_id: id } : {}),
-      });
+      }, { onProgress: setCoverProgress });
       const url = res.data.url;
       if (!url) throw new Error('A IA não retornou uma capa.');
       setForm((f) => ({ ...f, cover_image: url }));
       toast({ title: isNew ? 'Capa gerada. Salve o artigo para vinculá-la.' : 'Capa gerada e salva no artigo.' });
     } catch (err) {
-      toast({ title: 'Erro: ' + (err.response?.data?.error || err.message), variant: 'destructive' });
+      const message = 'Não foi possível concluir a capa: ' + (err.response?.data?.error || err.message);
+      setCoverError(message);
+      toast({ title: message, variant: 'destructive' });
     } finally {
       setCoverLoading(false);
     }
@@ -245,6 +252,7 @@ export default function AdminArticleEdit() {
             </Button>
             {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
           </div>
+          <CoverGenerationStatus loading={coverLoading} progress={coverProgress} error={coverError} />
           {form.cover_image && (
             <div className="mt-3 aspect-[16/9] w-full max-w-sm overflow-hidden rounded-lg bg-muted">
               <img src={form.cover_image} alt="capa" className="w-full h-full object-cover" />
