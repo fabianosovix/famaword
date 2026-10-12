@@ -93,7 +93,17 @@ export async function generateImage({ prompt, size = '1536x1024' }) {
   if (cfg.provider === 'gemini') {
     return geminiImage({ prompt, cfg });
   }
-  return openaiImage({ prompt, size, cfg });
+  const providerSize = cfg.model.startsWith('dall-e-') ? '1792x1024' : size;
+  return openaiImage({ prompt, size: providerSize, cfg });
+}
+
+// Temporary source only: the client converts to 1200x675 WebP before saving.
+export async function generateImageSource(prompt) {
+  const buffer = await generateImage({ prompt });
+  if (!buffer?.length) throw new Error('A IA não retornou uma imagem.');
+  const mime = buffer.subarray(0, 4).toString() === 'RIFF' ? 'image/webp'
+    : buffer[0] === 0xff ? 'image/jpeg' : 'image/png';
+  return `data:${mime};base64,${buffer.toString('base64')}`;
 }
 
 async function openaiImage({ prompt, size, cfg }) {
@@ -107,8 +117,10 @@ async function openaiImage({ prompt, size, cfg }) {
     throw new Error(`Image generation failed (${res.status}): ${err}`);
   }
   const data = await res.json();
-  const imageUrl = data.data?.[0]?.url;
-  if (!imageUrl) return null;
+  const image = data.data?.[0];
+  if (image?.b64_json) return Buffer.from(image.b64_json, 'base64');
+  const imageUrl = image?.url;
+  if (!imageUrl) throw new Error('A IA não retornou uma imagem.');
   const imgRes = await fetch(imageUrl);
   if (!imgRes.ok) throw new Error('Failed to download generated image');
   return Buffer.from(await imgRes.arrayBuffer());

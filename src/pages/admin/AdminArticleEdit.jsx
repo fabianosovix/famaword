@@ -277,7 +277,7 @@ export default function AdminArticleEdit() {
           <Label htmlFor="seo_desc">SEO Descrição</Label>
           <Textarea id="seo_desc" rows={2} value={form.seo_description} onChange={(e) => setForm({ ...form, seo_description: e.target.value })} />
         </div>
-        <Button type="submit" disabled={saving}>
+        <Button type="submit" disabled={saving || coverLoading || uploading || aiLoading}>
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
           Salvar artigo
         </Button>

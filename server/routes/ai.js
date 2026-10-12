@@ -1,11 +1,9 @@
 import express from 'express';
 import { getDb } from '../db.js';
 import { v4 as uuidv4 } from 'uuid';
-import { chatCompletion, generateImage } from '../lib/ai.js';
+import { chatCompletion, generateImageSource } from '../lib/ai.js';
 import { slugify, uniqueSlug } from '../lib/slug.js';
-import { config } from '../config.js';
-import path from 'path';
-import fs from 'fs';
+
 import { resolveArticleRelations } from '../lib/articleRelations.js';
 
 const router = express.Router();
@@ -60,58 +58,35 @@ Responda em JSON com este formato:
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'draft', 1, ?, ?, datetime('now'), datetime('now'))`
     ).run(id, parsed.title || topic, slug, parsed.summary || '', parsed.content || '', category_id || null, editor_id, language, parsed.seo_title || null, parsed.seo_description || null);
 
-    // Optionally generate cover
+    // Return the temporary source; only the converted WebP is uploaded
+    // and associated with this draft by the self-hosted client.
+    let cover_source;
+    let cover_error;
     if (generate_cover) {
       try {
-        const coverPrompt = `Capa de artigo profissional sobre "${parsed.title || topic}", estilo editorial moderno, 16:9, sem texto`;
-        const buffer = await generateImage({ prompt: coverPrompt, size: '1792x1024' });
-        if (buffer) {
-          const filename = `${uuidv4()}.webp`;
-          const destPath = path.join(config.uploadsDir, filename);
-          fs.writeFileSync(destPath, buffer);
-          const localUrl = `${config.publicUrl.replace(/\/$/, '')}/uploads/${filename}`;
-          db.prepare('UPDATE articles SET cover_image = ? WHERE id = ?').run(localUrl, id);
-        }
+        cover_source = await generateImageSource(`Capa de artigo profissional sobre "${parsed.title || topic}", estilo editorial moderno, 16:9, sem texto`);
       } catch (coverErr) {
-        console.error('Cover generation failed:', coverErr.message);
-        // Continue without cover
+        cover_error = coverErr.message;
       }
     }
 
     const article = db.prepare('SELECT * FROM articles WHERE id = ?').get(id);
-    res.json({ ok: true, article_id: id, article });
+    res.json({ ok: true, article_id: id, article, cover_source, cover_error });
   } catch (e) { next(e); }
 });
 
-// POST /api/ai/generate-cover — generate cover image for an existing article
+// Generate a temporary source; persistence happens after WebP conversion.
 router.post('/generate-cover', async (req, res, next) => {
   try {
     const { article_id, topic } = req.body;
-    // The article editor generates a temporary cover from a title, then
-    // converts it to 1200x675 WebP before uploading and saving it.
-    if (!article_id && topic) {
-      const buffer = await generateImage({ prompt: `Capa de artigo profissional sobre "${topic}", estilo editorial moderno, 16:9, sem texto` });
-      if (!buffer) return res.status(500).json({ message: 'Image generation failed' });
-      const mime = buffer.subarray(0, 4).toString() === 'RIFF' ? 'image/webp'
-        : buffer[0] === 0xff ? 'image/jpeg' : 'image/png';
-      return res.json({ ok: true, url: `data:${mime};base64,${buffer.toString('base64')}` });
-    }
-    if (!article_id) return res.status(400).json({ message: 'Informe o título ou o artigo para gerar a capa.' });
-    const db = getDb();
-    const article = db.prepare('SELECT title FROM articles WHERE id = ?').get(article_id);
-    if (!article) return res.status(404).json({ message: 'Article not found' });
-
-    const coverPrompt = `Capa de artigo profissional sobre "${article.title}", estilo editorial moderno, 16:9, sem texto`;
-    const buffer = await generateImage({ prompt: coverPrompt, size: '1792x1024' });
-    if (!buffer) return res.status(500).json({ message: 'Image generation failed' });
-
-    const filename = `${uuidv4()}.webp`;
-    const destPath = path.join(config.uploadsDir, filename);
-    fs.writeFileSync(destPath, buffer);
-    const localUrl = `${config.publicUrl.replace(/\/$/, '')}/uploads/${filename}`;
-    db.prepare('UPDATE articles SET cover_image = ? WHERE id = ?').run(localUrl, article_id);
-
-    res.json({ ok: true, cover_image: localUrl });
+    const article = article_id
+      ? getDb().prepare('SELECT title FROM articles WHERE id = ?').get(article_id)
+      : null;
+    if (article_id && !article) return res.status(404).json({ message: 'Article not found' });
+    const title = topic || article?.title;
+    if (!title) return res.status(400).json({ message: 'Informe o título ou o artigo para gerar a capa.' });
+    const url = await generateImageSource(`Capa de artigo profissional sobre "${title}", estilo editorial moderno, 16:9, sem texto`);
+    res.json({ ok: true, url, article_id });
   } catch (e) { next(e); }
 });
 
