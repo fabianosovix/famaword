@@ -348,7 +348,8 @@ const functions = {
     };
     const endpoint = endpoints[name];
     if (!endpoint) throw new Error(`Function "${name}" not found`);
-    return request(endpoint, { method: 'POST', body: JSON.stringify(data) });
+    const result = await request(endpoint, { method: 'POST', body: JSON.stringify(data) });
+    return { data: result };
   },
 };
 
