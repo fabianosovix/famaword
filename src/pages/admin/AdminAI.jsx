@@ -65,7 +65,7 @@ export default function AdminAI() {
     setAiLoading(true);
     try {
       const res = await base44.functions.invoke('generateArticle', { topic: aiTopic, category_id: aiCat, language: aiLang });
-      toast({ title: 'Rascunho gerado pela IA' });
+      toast({ title: 'Rascunho gerado pela IA', description: res.data.cover_error ? `Não foi possível gerar a capa: ${res.data.cover_error}` : undefined });
       setAiTopic('');
       navigate(`/admin/artigos/${res.data.article.id}`);
     } catch (err) {

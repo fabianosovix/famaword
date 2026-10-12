@@ -10,7 +10,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { Loader2, Sparkles, Save, Upload, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { fileToCoverWebp, urlToCoverWebp } from '@/lib/coverImage';
+import { fileToCoverWebp } from '@/lib/coverImage';
 
 const QUILL_MODULES = {
   toolbar: [
@@ -87,18 +87,13 @@ export default function AdminArticleEdit() {
     if (!topic) return toast({ title: 'Informe o título do artigo primeiro', variant: 'destructive' });
     setCoverLoading(true);
     try {
-      const res = await base44.functions.invoke('generateCoverImage', { topic });
+      const res = await base44.functions.invoke('generateCoverImage', {
+        topic, ...(!isNew ? { article_id: id } : {}),
+      });
       const url = res.data.url;
-      const result = await urlToCoverWebp(url);
-      if (result.blob) {
-        const webpFile = new File([result.blob], 'cover.webp', { type: 'image/webp' });
-        const { file_url } = await base44.integrations.Core.UploadPublicFile({ file: webpFile });
-        setForm((f) => ({ ...f, cover_image: file_url }));
-        toast({ title: 'Capa gerada por IA (stored publicly)' });
-      } else {
-        setForm((f) => ({ ...f, cover_image: result.fallback }));
-        toast({ title: 'Capa gerada por IA (URL original)' });
-      }
+      if (!url) throw new Error('A IA não retornou uma capa.');
+      setForm((f) => ({ ...f, cover_image: url }));
+      toast({ title: isNew ? 'Capa gerada. Salve o artigo para vinculá-la.' : 'Capa gerada e salva no artigo.' });
     } catch (err) {
       toast({ title: 'Erro: ' + (err.response?.data?.error || err.message), variant: 'destructive' });
     } finally {
@@ -116,11 +111,11 @@ export default function AdminArticleEdit() {
       const article = res.data.article;
       setForm({
         title: article.title, slug: article.slug, summary: article.summary,
-        content: article.content, cover_image: '', category_id: article.category_id,
+        content: article.content, cover_image: article.cover_image || '', category_id: article.category_id,
         editor_id: article.editor_id || 'random', status: 'draft',
         seo_title: article.seo_title, seo_description: article.seo_description,
       });
-      toast({ title: 'Rascunho gerado pela IA. Revise e publique.' });
+      toast({ title: 'Rascunho gerado pela IA. Revise e publique.', description: res.data.cover_error ? `Não foi possível gerar a capa: ${res.data.cover_error}` : undefined });
       setAiOpen(false);
       setAiTopic('');
       navigate(`/admin/artigos/${article.id}`);
@@ -237,7 +232,7 @@ export default function AdminArticleEdit() {
         </div>
         <div>
           <Label>Imagem de capa</Label>
-          <p className="text-xs text-muted-foreground mt-1">Padrão obrigatório: 1200x675px, WebP. Uploads fora desse tamanho são recusados.</p>
+          <p className="text-xs text-muted-foreground mt-1">Padrão único: 1200x675px, .webp. Capas de IA são ajustadas automaticamente; uploads devem ter esse tamanho e são convertidos para WebP.</p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <label className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-background text-sm cursor-pointer hover:bg-accent transition">
               <Upload className="w-4 h-4" /> Enviar imagem

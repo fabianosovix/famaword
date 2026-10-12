@@ -9,6 +9,8 @@
 //   import { base44 } from '@/api/selfHostedClient';
 // ─────────────────────────────────────────────────────────────
 
+import generatedCover from '@/lib/generatedCover';
+
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 // Use the same storage key as @base44/sdk's getAccessToken so the
 // platform-managed AuthContext (which reads appParams.token) detects the
@@ -349,6 +351,22 @@ const functions = {
     const endpoint = endpoints[name];
     if (!endpoint) throw new Error(`Function "${name}" not found`);
     const result = await request(endpoint, { method: 'POST', body: JSON.stringify(data) });
+    const source = name === 'generateCoverImage' ? result.url
+      : name === 'generateArticle' ? result.cover_source : null;
+    if (source) {
+      const articleId = name === 'generateArticle' ? result.article.id : data.article_id;
+      const persist = articleId ? url => request(`/articles/${articleId}`, {
+        method: 'PUT', body: JSON.stringify({ cover_image: url }),
+      }) : null;
+      const url = await generatedCover(source, uploadFile, persist);
+      if (name === 'generateArticle') {
+        result.article.cover_image = url;
+        delete result.cover_source;
+      } else {
+        result.url = url;
+        result.cover_image = url;
+      }
+    }
     return { data: result };
   },
 };

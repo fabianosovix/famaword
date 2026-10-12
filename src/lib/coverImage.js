@@ -40,7 +40,7 @@ function drawToWebp(img) {
     const y = (COVER_HEIGHT - h) / 2;
     ctx.drawImage(img, x, y, w, h);
     canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
+      if (blob?.type === 'image/webp') resolve(blob);
       else reject(new Error('Não foi possível converter para WebP'));
     }, 'image/webp', 0.9);
   });
@@ -55,14 +55,9 @@ export async function fileToCoverWebp(file) {
   return drawToWebp(img);
 }
 
-// IA: baixa a imagem gerada, redimensiona/recorta para o padrão e converte para WebP.
-// Retorna { blob } em caso de sucesso, ou { fallback: url } se o canvas for bloqueado (CORS).
+// IA: converte a fonte temporária para o mesmo padrão obrigatório dos uploads.
 export async function urlToCoverWebp(url) {
-  try {
-    const img = await loadImageFromUrl(url);
-    const blob = await drawToWebp(img);
-    return { blob };
-  } catch (e) {
-    return { fallback: url };
-  }
+  if (!url || typeof url !== 'string') throw new Error('A IA não retornou uma imagem.');
+  const img = await loadImageFromUrl(url);
+  return { blob: await drawToWebp(img) };
 }
