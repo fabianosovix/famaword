@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { injectHeaderScripts, injectFooterScripts } from '@/lib/injectScripts';
 
 const SettingsContext = createContext({ settings: null, loading: true, refresh: async () => {} });
 
@@ -30,11 +31,8 @@ export function SettingsProvider({ children }) {
 
   useEffect(() => {
     if (!settings) return;
-    // inject header scripts
-    const headerContainer = document.getElementById('__header_scripts');
-    if (headerContainer) headerContainer.innerHTML = settings.header_scripts || '';
-    const footerContainer = document.getElementById('__footer_scripts');
-    if (footerContainer) footerContainer.innerHTML = settings.footer_scripts || '';
+    injectHeaderScripts(settings.header_scripts || '');
+    injectFooterScripts(settings.footer_scripts || '');
   }, [settings]);
 
   return (
