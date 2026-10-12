@@ -12,7 +12,7 @@ const PROVIDERS = [
 ];
 
 const DEFAULT_MODELS = {
-  openai: { text: 'gpt-4o-mini', image: 'dall-e-3' },
+  openai: { text: 'gpt-4o-mini', image: 'gpt-image-1' },
   gemini: { text: 'gemini-2.0-flash', image: 'imagen-3.0-generate-002' },
 };
 

@@ -84,7 +84,7 @@ async function geminiText({ messages, model, jsonSchema, temperature, apiKey }) 
 
 // ─── Image generation ───────────────────────────────────────────
 // Returns a Buffer with the image bytes (caller writes to disk)
-export async function generateImage({ prompt, size = '1792x1024' }) {
+export async function generateImage({ prompt, size = '1536x1024' }) {
   const cfg = getAIConfig().image;
   if (!cfg.apiKey) {
     throw new Error('Chave de IA para imagens não configurada. Defina no painel admin → Inteligência Artificial.');
