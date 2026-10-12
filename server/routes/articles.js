@@ -4,6 +4,7 @@ import { getDb, mapRow, unmapData } from '../db.js';
 import { buildWhere, buildSort } from '../lib/query.js';
 import { optionalAuth } from '../auth.js';
 import { slugify, uniqueSlug } from '../lib/slug.js';
+import { resolveArticleRelations } from '../lib/articleRelations.js';
 
 const router = express.Router();
 const TABLE = 'articles';
@@ -54,6 +55,7 @@ router.post('/', (req, res, next) => {
     const db = getDb();
     const body = { ...req.body };
     if (!body.title) return res.status(400).json({ message: 'Title is required' });
+    Object.assign(body, resolveArticleRelations(body.category_id, body.editor_id));
     body.slug = body.slug ? uniqueSlug(slugify(body.slug), TABLE) : uniqueSlug(slugify(body.title), TABLE);
 
     const id = uuidv4();

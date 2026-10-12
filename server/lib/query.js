@@ -71,9 +71,9 @@ export function buildWhere(query = {}) {
       if (!Array.isArray(value)) continue;
       const subParts = [];
       for (const subQuery of value) {
-        const [subSql, subParams] = buildWhere(subQuery);
+        const { where: subSql, params: subParams } = buildWhere(subQuery);
         if (subSql) {
-          subParts.push(subSql.replace(/^WHERE /, ''));
+          subParts.push(`(${subSql.replace(/^WHERE /, '')})`);
           params.push(...subParams);
         }
       }
@@ -95,7 +95,7 @@ export function buildWhere(query = {}) {
   }
 
   if (conditions.length === 0) return { where: '', params };
-  return { where: `WHERE ${conditions.join(' AND ')}`, params };
+  return { where: `WHERE ${conditions.join(' AND ')}`, params: params.map(value => typeof value === 'boolean' ? Number(value) : value) };
 }
 
 // Parse sort string: '-created_date' → 'created_date DESC', 'title' → 'title ASC'

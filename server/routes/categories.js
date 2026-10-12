@@ -18,7 +18,7 @@ router.get('/', (req, res, next) => {
     let query = {};
     if (req.query.q) { try { query = JSON.parse(req.query.q); } catch {} }
     const { where, params } = buildWhere(query);
-    const sort = buildSort(req.query.sort || '"order"');
+    const sort = buildSort(req.query.sort || 'order');
     const limit = Math.min(parseInt(req.query.limit, 10) || 100, 1000);
     const offset = req.query.cursor ? parseInt(Buffer.from(req.query.cursor, 'base64').toString(), 10) || 0 : 0;
 

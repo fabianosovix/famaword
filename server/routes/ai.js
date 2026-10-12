@@ -6,6 +6,7 @@ import { slugify, uniqueSlug } from '../lib/slug.js';
 import { config } from '../config.js';
 import path from 'path';
 import fs from 'fs';
+import { resolveArticleRelations } from '../lib/articleRelations.js';
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ router.post('/generate-article', async (req, res, next) => {
   try {
     const { topic, category_id, language = 'pt-BR', generate_cover = true } = req.body;
     if (!topic) return res.status(400).json({ message: 'Topic is required' });
+    const { editor_id } = resolveArticleRelations(category_id, req.body.editor_id);
 
     const langNames = { 'pt-BR': 'português brasileiro', 'es': 'espanhol', 'en': 'inglês', 'fr': 'francês', 'ar': 'árabe' };
     const langName = langNames[language] || 'português';
@@ -48,8 +50,7 @@ Responda em JSON com este formato:
 
     // Resolve editor
     const db = getDb();
-    const editors = db.prepare('SELECT id FROM editors ORDER BY RANDOM() LIMIT 1').all();
-    const editor_id = editors[0]?.id || null;
+
 
     // Create draft article
     const id = uuidv4();
@@ -85,8 +86,17 @@ Responda em JSON com este formato:
 // POST /api/ai/generate-cover — generate cover image for an existing article
 router.post('/generate-cover', async (req, res, next) => {
   try {
-    const { article_id } = req.body;
-    if (!article_id) return res.status(400).json({ message: 'article_id is required' });
+    const { article_id, topic } = req.body;
+    // The article editor generates a temporary cover from a title, then
+    // converts it to 1200x675 WebP before uploading and saving it.
+    if (!article_id && topic) {
+      const buffer = await generateImage({ prompt: `Capa de artigo profissional sobre "${topic}", estilo editorial moderno, 16:9, sem texto` });
+      if (!buffer) return res.status(500).json({ message: 'Image generation failed' });
+      const mime = buffer.subarray(0, 4).toString() === 'RIFF' ? 'image/webp'
+        : buffer[0] === 0xff ? 'image/jpeg' : 'image/png';
+      return res.json({ ok: true, url: `data:${mime};base64,${buffer.toString('base64')}` });
+    }
+    if (!article_id) return res.status(400).json({ message: 'Informe o título ou o artigo para gerar a capa.' });
     const db = getDb();
     const article = db.prepare('SELECT title FROM articles WHERE id = ?').get(article_id);
     if (!article) return res.status(404).json({ message: 'Article not found' });
@@ -124,6 +134,7 @@ router.post('/run-scheduled', async (req, res, next) => {
     const results = [];
     for (const task of tasks) {
       try {
+        const relations = resolveArticleRelations(task.category_id);
         // Mark as processing
         if (task.type === 'queue') {
           db.prepare("UPDATE ai_queue SET status = 'processing', updated_date = datetime('now') WHERE id = ?").run(task.id);
@@ -138,13 +149,13 @@ router.post('/run-scheduled', async (req, res, next) => {
         let parsed;
         try { parsed = JSON.parse(jsonText); } catch { parsed = { title: task.topic, summary: '', content: jsonText }; }
 
-        const editors = db.prepare('SELECT id FROM editors ORDER BY RANDOM() LIMIT 1').all();
+
         const articleId = uuidv4();
         const slug = uniqueSlug(slugify(parsed.title || task.topic), 'articles');
         db.prepare(
           `INSERT INTO articles (id, title, slug, summary, content, category_id, editor_id, language, status, ai_generated, seo_title, seo_description, created_date, updated_date)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'published', 1, ?, ?, datetime('now'), datetime('now'))`
-        ).run(articleId, parsed.title || task.topic, slug, parsed.summary || '', parsed.content || '', task.category_id || null, editors[0]?.id || null, task.language, parsed.seo_title || null, parsed.seo_description || null);
+        ).run(articleId, parsed.title || task.topic, slug, parsed.summary || '', parsed.content || '', relations.category_id, relations.editor_id, task.language, parsed.seo_title || null, parsed.seo_description || null);
 
         if (task.type === 'queue') {
           db.prepare("UPDATE ai_queue SET status = 'done', result_article_id = ?, updated_date = datetime('now') WHERE id = ?").run(articleId, task.id);

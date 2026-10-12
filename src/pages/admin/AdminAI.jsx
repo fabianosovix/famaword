@@ -24,6 +24,7 @@ export default function AdminAI() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [cats, setCats] = useState([]);
+  const [hasEditor, setHasEditor] = useState(false);
   const [schedules, setSchedules] = useState([]);
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,11 +40,13 @@ export default function AdminAI() {
   const load = async () => {
     setLoading(true);
     try {
-      const [c, s, q] = await Promise.all([
+      const [c, s, q, ed] = await Promise.all([
         base44.entities.Category.filter({}, { sort: 'order', limit: 200 }),
         base44.entities.AISchedule.filter({}, { sort: 'day_of_week', limit: 100 }),
         base44.entities.AIQueue.filter({}, { sort: '-created_date', limit: 50 }),
+        base44.entities.Editor.filter({}, { limit: 1, fields: ['id'] }),
       ]);
+      setHasEditor(!!ed.items?.length);
       setCats(c.items || []);
       setSchedules(s.items || []);
       setQueue(q.items || []);
@@ -57,6 +60,7 @@ export default function AdminAI() {
   useEffect(() => { load(); }, []);
 
   const generateNow = async () => {
+    if (!cats.length || !hasEditor) return toast({ title: 'Cadastre pelo menos uma categoria e um editor antes de criar artigos.', variant: 'destructive' });
     if (!aiTopic || !aiCat) return toast({ title: 'Informe tema e categoria', variant: 'destructive' });
     setAiLoading(true);
     try {
@@ -105,6 +109,7 @@ export default function AdminAI() {
   };
 
   const runNow = async () => {
+    if (!cats.length || !hasEditor) return toast({ title: 'Cadastre pelo menos uma categoria e um editor antes de criar artigos.', variant: 'destructive' });
     try {
       const res = await base44.functions.invoke('runScheduledAI', {});
       toast({ title: `Processado: ${res.data.processed} artigo(s)` });
@@ -122,10 +127,11 @@ export default function AdminAI() {
     <div className="space-y-8">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <h1 className="font-heading font-bold text-2xl">Inteligência Artificial</h1>
-        <Button variant="outline" onClick={runNow}><Play className="w-4 h-4 mr-2" /> Processar agora</Button>
+        <Button variant="outline" onClick={runNow} disabled={!cats.length || !hasEditor}><Play className="w-4 h-4 mr-2" /> Processar agora</Button>
       </div>
 
       <AIProviderConfig />
+      {(!cats.length || !hasEditor) && <p className="text-destructive">Cadastre pelo menos uma categoria e um editor antes de criar artigos.</p>}
 
       <section className="bg-background border border-border rounded-lg p-5 space-y-3">
         <h2 className="font-heading font-semibold flex items-center gap-2"><Sparkles className="w-4 h-4" /> Gerar artigo agora</h2>
@@ -140,7 +146,7 @@ export default function AdminAI() {
             {LANGUAGES.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
           </select>
         </div>
-        <Button onClick={generateNow} disabled={aiLoading}>
+        <Button onClick={generateNow} disabled={aiLoading || !cats.length || !hasEditor}>
           {aiLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
           Gerar rascunho
         </Button>

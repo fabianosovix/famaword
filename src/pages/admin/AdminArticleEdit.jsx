@@ -27,7 +27,7 @@ export default function AdminArticleEdit() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isNew = id === 'novo' || !id;
-  const [loading, setLoading] = useState(!isNew);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [cats, setCats] = useState([]);
   const [editors, setEditors] = useState([]);
@@ -107,6 +107,7 @@ export default function AdminArticleEdit() {
   };
 
   const generateAI = async () => {
+    if (!cats.length || !editors.length) return toast({ title: 'Cadastre pelo menos uma categoria e um editor antes de criar artigos.', variant: 'destructive' });
     const catId = aiCat || form.category_id;
     if (!aiTopic || !catId) return toast({ title: 'Informe tema e categoria', variant: 'destructive' });
     setAiLoading(true);
@@ -132,6 +133,7 @@ export default function AdminArticleEdit() {
 
   const save = async (e) => {
     e.preventDefault();
+    if (!cats.length || !editors.length) return toast({ title: 'Cadastre pelo menos uma categoria e um editor antes de criar artigos.', variant: 'destructive' });
     if (!form.title || !form.category_id) return toast({ title: 'Título e categoria são obrigatórios', variant: 'destructive' });
     const slug = form.slug || slugify(form.title);
     // Resolve "aleatório" para um editor real
@@ -162,6 +164,16 @@ export default function AdminArticleEdit() {
   };
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
+  if (isNew && (!cats.length || !editors.length)) return (
+    <div className="space-y-4">
+      <h1 className="font-heading font-bold text-2xl">Novo artigo</h1>
+      <p className="text-muted-foreground">Cadastre pelo menos uma categoria e um editor antes de criar artigos.</p>
+      <div className="flex gap-4">
+        <Link to="/admin/categorias" className="underline">Cadastrar categoria</Link>
+        <Link to="/admin/editores" className="underline">Cadastrar editor</Link>
+      </div>
+    </div>
+  );
 
   return (
     <div>
