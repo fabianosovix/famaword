@@ -10,19 +10,6 @@ const TABLE = 'articles';
 const BOOL_FIELDS = ['ai_generated'];
 const MAP_OPTS = { booleanFields: BOOL_FIELDS };
 
-function camelKeys(obj) {
-  if (!obj) return obj;
-  const out = {};
-  for (const [k, v] of Object.entries(obj)) out[k.replace(/_([a-z])/g, (_, c) => c.toUpperCase())] = v;
-  return out;
-}
-function snakeKeys(obj) {
-  if (!obj) return obj;
-  const out = {};
-  for (const [k, v] of Object.entries(obj)) out[k.replace(/[A-Z]/g, c => '_' + c.toLowerCase())] = v;
-  return out;
-}
-
 router.use(optionalAuth);
 
 // GET / — list
@@ -43,7 +30,7 @@ router.get('/', (req, res, next) => {
     }
 
     const rows = getDb().prepare(`SELECT ${selectCols} FROM ${TABLE} ${where} ${sort} LIMIT ? OFFSET ?`).all(...params, limit, offset);
-    const items = rows.map(r => camelKeys(mapRow(r, MAP_OPTS)));
+    const items = rows.map(r => mapRow(r, MAP_OPTS));
     const hasMore = items.length === limit;
     res.json({ items, next_cursor: hasMore ? Buffer.from(String(offset + limit)).toString('base64') : null, has_more: hasMore });
   } catch (e) { next(e); }
@@ -54,7 +41,7 @@ router.get('/:id', (req, res, next) => {
   try {
     const row = getDb().prepare(`SELECT * FROM ${TABLE} WHERE id = ?`).get(req.params.id);
     if (!row) return res.status(404).json({ message: 'Not found' });
-    const record = camelKeys(mapRow(row, MAP_OPTS));
+    const record = mapRow(row, MAP_OPTS);
     if (!req.user && record.status !== 'published') return res.status(404).json({ message: 'Not found' });
     res.json(record);
   } catch (e) { next(e); }
@@ -70,14 +57,14 @@ router.post('/', (req, res, next) => {
     body.slug = body.slug ? uniqueSlug(slugify(body.slug), TABLE) : uniqueSlug(slugify(body.title), TABLE);
 
     const id = uuidv4();
-    const data = unmapData(snakeKeys(body), MAP_OPTS);
+    const data = unmapData(body, MAP_OPTS);
     const cols = Object.keys(data);
     db.prepare(
       `INSERT INTO ${TABLE} (id, ${cols.map(c => `"${c}"`).join(', ')}, created_date, updated_date)
        VALUES (?, ${cols.map(() => '?').join(', ')}, datetime('now'), datetime('now'))`
     ).run(id, ...cols.map(c => data[c]));
     const row = db.prepare(`SELECT * FROM ${TABLE} WHERE id = ?`).get(id);
-    res.status(201).json(camelKeys(mapRow(row, MAP_OPTS)));
+    res.status(201).json(mapRow(row, MAP_OPTS));
   } catch (e) { next(e); }
 });
 
@@ -92,14 +79,14 @@ router.put('/:id', (req, res, next) => {
     const body = { ...req.body };
     if (body.slug) body.slug = uniqueSlug(slugify(body.slug), TABLE, req.params.id);
 
-    const data = unmapData(snakeKeys(body), MAP_OPTS);
+    const data = unmapData(body, MAP_OPTS);
     const cols = Object.keys(data);
     if (cols.length) {
       db.prepare(`UPDATE ${TABLE} SET ${cols.map(c => `"${c}" = ?`).join(', ')}, updated_date = datetime('now') WHERE id = ?`)
         .run(...cols.map(c => data[c]), req.params.id);
     }
     const row = db.prepare(`SELECT * FROM ${TABLE} WHERE id = ?`).get(req.params.id);
-    res.json(camelKeys(mapRow(row, MAP_OPTS)));
+    res.json(mapRow(row, MAP_OPTS));
   } catch (e) { next(e); }
 });
 

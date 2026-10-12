@@ -13,6 +13,8 @@ import editorsRouter from './routes/editors.js';
 import settingsRouter from './routes/settings.js';
 import usersRouter from './routes/users.js';
 import aiRouter from './routes/ai.js';
+import aiScheduleRouter from './routes/ai_schedule.js';
+import aiQueueRouter from './routes/ai_queue.js';
 import mediaRouter from './routes/media.js';
 import sitemapRouter from './routes/sitemap.js';
 
@@ -42,6 +44,8 @@ app.use('/api/editors', editorsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/users', requireAuth, requireAdmin, usersRouter);
 app.use('/api/ai', requireAuth, aiRouter);
+app.use('/api/ai_schedule', requireAuth, aiScheduleRouter);
+app.use('/api/ai_queue', requireAuth, aiQueueRouter);
 app.use('/api/media', requireAuth, mediaRouter);
 
 // Health check
