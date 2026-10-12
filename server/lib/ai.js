@@ -100,7 +100,7 @@ async function openaiImage({ prompt, size, cfg }) {
   const res = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.apiKey}` },
-    body: JSON.stringify({ model: cfg.model, prompt, n: 1, size, response_format: 'url' }),
+    body: JSON.stringify({ model: cfg.model, prompt, n: 1, size }),
   });
   if (!res.ok) {
     const err = await res.text();
