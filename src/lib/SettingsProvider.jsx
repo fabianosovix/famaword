@@ -29,10 +29,39 @@ export function SettingsProvider({ children }) {
     }
   }, [settings]);
 
+  // Delay script injection until ad-slot hooks are in the DOM on article
+  // pages — the article content is fetched async, so injecting scripts
+  // immediately can cause ad scripts to scan before hooks exist.
   useEffect(() => {
     if (!settings) return;
-    injectHeaderScripts(settings.header_scripts || '');
-    injectFooterScripts(settings.footer_scripts || '');
+
+    let injected = false;
+    const doInject = () => {
+      if (injected) return;
+      injected = true;
+      injectHeaderScripts(settings.header_scripts || '');
+      injectFooterScripts(settings.footer_scripts || '');
+    };
+
+    const isArticlePage = window.location.pathname.startsWith('/artigo/');
+
+    if (!isArticlePage) {
+      const timer = setTimeout(doInject, 300);
+      return () => clearTimeout(timer);
+    }
+
+    // Article page: poll for .ad-slot elements before injecting
+    let attempts = 0;
+    const maxAttempts = 15; // ~1.5s
+    const poll = setInterval(() => {
+      attempts++;
+      if (document.querySelector('.ad-slot') || attempts >= maxAttempts) {
+        clearInterval(poll);
+        doInject();
+      }
+    }, 100);
+
+    return () => clearInterval(poll);
   }, [settings]);
 
   return (
