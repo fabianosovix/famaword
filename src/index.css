@@ -91,23 +91,8 @@
   }
 }
 
-/* Sticky transitório para hooks de anúncio do artigo.
-   Replica o trilho do wrapper MCM: o hook vira um rail relativo e o
-   conteúdo injetado (anúncio) fica sticky no topo durante a rolagem.
-   Hooks vazios (sem anúncio) não têm impacto visual. */
-.ad-slot[data-sticky="true"] {
-  position: relative;
-  clear: both;
-  margin: 24px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  text-align: center;
-}
-.ad-slot[data-sticky="true"] > * {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 16px;
-}
+/* Sticky transitório dos anúncios é controlado pelo wrapper MCM, que cria
+   seus próprios .mcm-rail > .mcm-slot dentro de .entry-content e aplica
+   position:sticky via CSS próprio quando o.st > 0 na config do slot.
+   O atributo data-sticky nos hooks abaixo é apenas um marcador — não tem
+   CSS próprio para não gerar espaço em branco em hooks vazios. */
