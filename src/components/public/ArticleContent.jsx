@@ -14,6 +14,7 @@ function withAdPlacements(html) {
   const before = doc.createElement('div');
   before.className = 'ad-slot ad-before-content';
   before.setAttribute('data-ad', 'before-content');
+  before.setAttribute('data-sticky', 'true');
   body.insertBefore(before, body.firstChild);
 
   // After-paragraph hooks — one per top-level <p> so the ad script
@@ -24,6 +25,7 @@ function withAdPlacements(html) {
     hook.className = 'ad-slot ad-after-paragraph';
     hook.setAttribute('data-ad', 'after-paragraph');
     hook.setAttribute('data-paragraph', String(i + 1));
+    hook.setAttribute('data-sticky', 'true');
     p.after(hook);
   });
 
@@ -31,6 +33,7 @@ function withAdPlacements(html) {
   const after = doc.createElement('div');
   after.className = 'ad-slot ad-after-content';
   after.setAttribute('data-ad', 'after-content');
+  after.setAttribute('data-sticky', 'true');
   body.appendChild(after);
 
   return body.innerHTML;
